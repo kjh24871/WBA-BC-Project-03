@@ -49,29 +49,38 @@ contract Liquidity is ILiquidity{
 
 ////////////////////////////////////////////////////////////////
 // CPMM
-// _minToken : 슬리피지가 포함된 값, 최소 사용자에게 줘야하는 토큰
-  function ethToERC20CPMMSwap(uint256 _minToken) public payable{
+// _minToken : 슬리피지가 포함된 값, 최소 사용자에게 줘야하는 토큰, 사용자가 입력한 슬리피지 값
+  function swapCoinToToken(uint256 _minToken) public payable{
     // 사용자게에 받은 이더의 양
     uint256 inputAmount = msg.value;
     // Exchange가 가지고 있는 이더리움의 양
     uint256 x = address(this).balance - inputAmount;
     // Exchange가 가지고 있는 토큰의 양
     uint256 y = token.balanceOf(address(this));
-    uint256 ouputAmount = getOutputAmount(msg.value, x, y);
-    require(ouputAmount >= _minToken , "lack of amount");
-    token.transfer(msg.sender, ouputAmount);
+    uint256 outputAmount = getSwapRatio(msg.value, x, y);
+    // 사용자가 입력한 최소의 슬리피지값 이상은 되야 교환가능하다.
+    require(outputAmount >= _minToken , "lack of amount");
+    // 사용자에게 보낸다.
+    IERC20(token).transfer(msg.sender, outputAmount);
   }
 
   // _tokenAmount : 몇개의 토큰을 바꿀껀지
   // _minCoin : 슬리피지가 입력된 값
-  // function tokenToCoinSwap(uint256 _tokenAmount, uint256 _minCoin) public payable{
-
-  //   uint256 outputAmount = getOutputAmount(msg.value, address(this))
-  // }
+  function swapTokensToCoin(uint256 _tokenAmount, uint256 _minCoin) public payable{
+    // Liquidity 컨트랙트가 가지고 있는 토큰의 양, 코인의 양 
+    uint256 outputAmount = getSwapRatio(_tokenAmount, token.balanceOf(address(this)), address(this).balance);
+    // 입력받은 슬리피지보다 많이 받아야한다.
+    require(outputAmount >= _minCoin , "lack of amount");
+    // 사용자가 토큰을 Liquidity(컨트랙트)에게 보내게한다.
+    IERC20(token).transferFrom(msg.sender, address(this),_tokenAmount);
+    // 이더를 보낸다. 함수를 호출한 사용자에게
+    // payable(msg.sender) : https://ethereum.stackexchange.com/questions/113243/payablemsg-sender
+    payable(msg.sender).transfer(outputAmount);
+  }
 
   // CPMM
   // y를 구하기 위함, x는 Exchange가 가지고 있는 이더리움의 양, y는 토큰의 양
-  function getOutputAmount(uint256 inputAmount, uint256 x, uint256 y) public pure returns (uint256){
+  function getSwapRatio(uint256 inputAmount, uint256 x, uint256 y) public pure returns (uint256){
     uint256 numerator = y * inputAmount;
     uint256 denominator = x + inputAmount;
     return numerator/denominator;

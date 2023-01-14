@@ -153,9 +153,8 @@ contract('Liquidity', (accounts) => {
     });
   });
   describe('CPMM', async () => {
-    it('CPMM swap', async () => {
+    it('토큰을 코인으로 스왑할 수 있다.', async () => {
       await token.approve(liquidity.address, toWei('4000', 'ether'));
-      // 유동성 공급자가 40개의 토큰과 10개의 이더리움을 추가로 공급했다. (총 37개 이더 보유/155개 토큰 보유)
       await liquidity.addLiquidity(toWei('40', 'ether'), {
         value: toWei('10', 'ether'),
       });
@@ -165,7 +164,7 @@ contract('Liquidity', (accounts) => {
       // console.log(toBN(exchangeBalance).toString());
       // console.log(toBN(balance).toString());
 
-      await liquidity.ethToERC20CPMMSwap(toWei('0', 'ether'), {
+      await liquidity.swapCoinToToken(toWei('0', 'ether'), {
         from: accounts[1],
         value: web3.utils.toWei('1', 'ether'),
       });
