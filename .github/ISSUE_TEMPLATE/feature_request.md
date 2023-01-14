@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: ''
+title: "[Task] 이슈카드 제목 설정하기"
 labels: ''
 assignees: ''
 
@@ -12,5 +12,5 @@ assignees: ''
 - Type : Feature, Bug
 
 ### TODO
-[] job1
-[] job2
+1. [ ] job1
+2. [ ] job2
