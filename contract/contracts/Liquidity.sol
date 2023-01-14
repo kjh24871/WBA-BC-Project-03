@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./ILiquidity.sol";
 
 
-
-
 contract Liquidity is ILiquidity{
 
   IERC20 token;
@@ -17,17 +15,26 @@ contract Liquidity is ILiquidity{
   constructor (address _token){
     token = IERC20(_token);
   }
+
   // 유동성 공급을 위한 함수
   function addLiquidity(uint256 _amount) public payable{
     // 해당 함수 호출 시 ERC20토큰의 수량과 이더리움을 함께 받습니다.
     //TODO 사용자 address에 liquidity 기록하기
     token.transferFrom(msg.sender, address(this), _amount);
   }
+
+  function removeLiquidity(uint256 _amount) external payable{}
   // Exchange 컨트랙트가 현재 가지고 있는 이더리움의 개수를 보여주기 위함입니다.
   function getBalance() public view returns(uint256){
     return address(this).balance;
   }
 
+  function swapTokensToCoin(address _tokenIn, uint256 _tokenInAmount) external{}
+  function swapCoinToToken(address _tokenOut, uint256 _tokenOutAmount) external payable{}
+  function getLiquidity() external view returns (uint256 liquidity, uint256 tokenAmount, uint256 coinAmount){}
+  function getUserLiquidity() external view returns(uint256 amount){}
+  function getSwapRatio(uint256 inputAmount, uint256 x, uint256 y) external pure returns (uint256){}
+  function pullReward()external{}
   // CSMM
   // 이더리움을 받고 토큰을 내주는 스왑 함수입니다.
   function ethToERC20CSMMSwap() public payable{
