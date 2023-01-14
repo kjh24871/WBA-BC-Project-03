@@ -2,10 +2,16 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./ILiquidity.sol";
 
-contract Exchange {
+
+
+
+contract Liquidity is ILiquidity{
 
   IERC20 token;
+
+  //TODO 사용자 address에 liquidity mapping한 값 가지고 있기
 
   // 풀을 만들고자하는 토큰의 주소를 초기값으로 받습니다.
   constructor (address _token){
@@ -14,6 +20,7 @@ contract Exchange {
   // 유동성 공급을 위한 함수
   function addLiquidity(uint256 _amount) public payable{
     // 해당 함수 호출 시 ERC20토큰의 수량과 이더리움을 함께 받습니다.
+    //TODO 사용자 address에 liquidity 기록하기
     token.transferFrom(msg.sender, address(this), _amount);
   }
   // Exchange 컨트랙트가 현재 가지고 있는 이더리움의 개수를 보여주기 위함입니다.

@@ -1,5 +1,5 @@
 const token = artifacts.require('WEMEXToken');
-const exchange = artifacts.require('Exchange');
+const exchange = artifacts.require('Liquidity');
 const _name = 'WEMEXToken';
 const _symbol = 'MEX';
 const _decimals = 18;
