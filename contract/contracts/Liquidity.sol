@@ -57,14 +57,21 @@ contract Liquidity is ILiquidity{
     uint256 x = address(this).balance - inputAmount;
     // Exchange가 가지고 있는 토큰의 양
     uint256 y = token.balanceOf(address(this));
-    uint256 ouputAmount = getOuputAmount(msg.value, x, y);
+    uint256 ouputAmount = getOutputAmount(msg.value, x, y);
     require(ouputAmount >= _minToken , "lack of amount");
     token.transfer(msg.sender, ouputAmount);
   }
 
+  // _tokenAmount : 몇개의 토큰을 바꿀껀지
+  // _minCoin : 슬리피지가 입력된 값
+  // function tokenToCoinSwap(uint256 _tokenAmount, uint256 _minCoin) public payable{
+
+  //   uint256 outputAmount = getOutputAmount(msg.value, address(this))
+  // }
+
   // CPMM
   // y를 구하기 위함, x는 Exchange가 가지고 있는 이더리움의 양, y는 토큰의 양
-  function getOuputAmount(uint256 inputAmount, uint256 x, uint256 y) public pure returns (uint256){
+  function getOutputAmount(uint256 inputAmount, uint256 x, uint256 y) public pure returns (uint256){
     uint256 numerator = y * inputAmount;
     uint256 denominator = x + inputAmount;
     return numerator/denominator;
