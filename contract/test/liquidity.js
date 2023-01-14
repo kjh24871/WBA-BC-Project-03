@@ -1,4 +1,4 @@
-const Exchange = artifacts.require('Exchange');
+const Liquidity = artifacts.require('Liquidity');
 const { expect } = require('chai');
 const { ethers, providers } = require('ethers');
 
@@ -14,7 +14,7 @@ contract('Liquidity', (accounts) => {
     console.log(accounts);
     token = await Token.deployed();
     console.log('Token Contract Address:', token.address);
-    liquidity = await Exchange.deployed();
+    liquidity = await Liquidity.deployed();
     console.log('exchangeInstance Address', liquidity.address);
   });
 
@@ -152,25 +152,90 @@ contract('Liquidity', (accounts) => {
       console.log(web3.utils.fromWei(web3.utils.toBN(temp2).toString()));
     });
   });
-  describe('CPMM', async () => {
-    it('토큰을 코인으로 스왑할 수 있다.', async () => {
-      await token.approve(liquidity.address, toWei('4000', 'ether'));
-      await liquidity.addLiquidity(toWei('40', 'ether'), {
-        value: toWei('10', 'ether'),
-      });
-      let exchangeBalance = await liquidity.getBalance();
-      var balance = await token.balanceOf(liquidity.address);
-      let price = await liquidity.getPrice(exchangeBalance, balance);
-      // console.log(toBN(exchangeBalance).toString());
-      // console.log(toBN(balance).toString());
+  describe('swap coin to token', async () => {
+    it('사용자는 이더리움을 넣고 CPMM 알고리즘에 의해 토큰을 받을 수 있다.', async () => {
+      await token.approve(liquidity.address, toWei('1000', 'ether'));
 
-      await liquidity.swapCoinToToken(toWei('0', 'ether'), {
+      // 토큰 1000 : 이더 200
+      await liquidity.addLiquidity(toWei('1000', 'ether'), {
+        from: accounts[0],
+        value: toWei('200', 'ether'),
+      });
+
+      // 토큰 1000개, 이더 200개 => 비율 5 : 1
+      // 사용자가 1개의 토큰을 넣는다. => 사용자는 1개를 넣으면 토큰 5개를 받을 것으로 예상
+      // 실제 받은 토큰은 497.xx개의 토큰을 받음
+
+      // 받을 토큰 y는 = 1000MEX * 1 / 200ETH + 1
+
+      let liquidityTokenBalance = await token.balanceOf(liquidity.address);
+      let liquidityBalance = await liquidity.getBalance();
+      console.log(
+        'liquidityTokenBalance : ',
+        toBN(liquidityTokenBalance).toString()
+      );
+      console.log('liquidityBalance : ', toBN(liquidityBalance).toString());
+      let tempRatio = await liquidity.getSwapRatio(
+        web3.utils.toWei('1', 'ether'),
+        liquidityBalance,
+        liquidityTokenBalance
+      );
+
+      console.log('슬리피지 적용 시 : ', toBN(tempRatio).toString());
+
+      await liquidity.swapCoinToToken(toWei('1', 'ether'), {
         from: accounts[1],
         value: web3.utils.toWei('1', 'ether'),
       });
-      // console.log(accounts[1]);
-      let temp = await token.balanceOf(accounts[1]);
-      // console.log(toBN(temp).toString());
+
+      let accountTokenBalance = await token.balanceOf(accounts[1]);
+      console.log(
+        'address가 받은 Token : ',
+        toBN(accountTokenBalance).toString()
+      );
     });
   });
+  // describe('swap token to coin', async () => {
+  //   it('사용자는 이더리움을 넣고 CPMM 알고리즘에 의해 토큰을 받을 수 있다.', async () => {
+  //     await token.approve(liquidity.address, toWei('1000', 'ether'));
+
+  //     // 토큰 1000 : 이더 200
+  //     await liquidity.addLiquidity(toWei('1000', 'ether'), {
+  //       from: accounts[0],
+  //       value: toWei('200', 'ether'),
+  //     });
+
+  //     // 토큰 1000개, 이더 200개 => 비율 5 : 1
+  //     // 사용자가 1개의 토큰을 넣는다. => 사용자는 1개를 넣으면 토큰 5개를 받을 것으로 예상
+  //     // 실제 받은 토큰은 497.xx개의 토큰을 받음
+
+  //     // 받을 토큰 y는 = 1000MEX * 1 / 200ETH + 1
+
+  //     let liquidityTokenBalance = await token.balanceOf(liquidity.address);
+  //     let liquidityBalance = await liquidity.getBalance();
+  //     console.log(
+  //       'liquidityTokenBalance : ',
+  //       toBN(liquidityTokenBalance).toString()
+  //     );
+  //     console.log('liquidityBalance : ', toBN(liquidityBalance).toString());
+  //     let tempRatio = await liquidity.getSwapRatio(
+  //       web3.utils.toWei('1', 'ether'),
+  //       liquidityBalance,
+  //       liquidityTokenBalance
+  //     );
+
+  //     console.log('슬리피지 적용 시 : ', toBN(tempRatio).toString());
+
+  //     await liquidity.swapCoinToToken(toWei('1', 'ether'), {
+  //       from: accounts[1],
+  //       value: web3.utils.toWei('1', 'ether'),
+  //     });
+
+  //     let accountTokenBalance = await token.balanceOf(accounts[1]);
+  //     console.log(
+  //       'address가 받은 Token : ',
+  //       toBN(accountTokenBalance).toString()
+  //     );
+  //   });
+  // });
 });
