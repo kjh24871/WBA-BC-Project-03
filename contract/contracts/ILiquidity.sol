@@ -35,6 +35,8 @@ interface ILiquidity{
 }
 
 
-// TODO (시간남으면) token to token
+// TODO token to token
+
+
 // 새로운 리퀴디티 풀을 배포하는 컨트랙트
 // 관리자만 쓸 수 있는

@@ -14,7 +14,8 @@ contract Liquidity is ILiquidity, ERC20{
   //TODO 사용자 address에 liquidity mapping한 값 가지고 있기
   event SwapTokenToToken(address caller, address to, uint256 amount);
 
-  // 풀을 만들고자하는 토큰의 주소를 초기값으로 받습니다.
+  // 풀을 만들고자하는 토큰의 주소를 초기값으로 받는다.
+  // 생성자를 통해 LP토큰의 Name과 Symbol을 넣어준다
   constructor (address _token) ERC20("lpToken","LP"){
     token = IERC20(_token);
   }
@@ -37,37 +38,46 @@ contract Liquidity is ILiquidity, ERC20{
       // 200 x (500/1000)
       uint256 inputTokenAmount = msg.value * tokenAmount / ethAmount;
       // 사용자가 입력한 토큰보다 적은 양을 liquidity 컨트랙트가 가져올 수 있도록 조건을 설정한다.
-      require(_maxToken >= inputTokenAmount);
+      require(_maxToken >= inputTokenAmount,"-----?");
+    
       token.transferFrom(msg.sender, address(this), inputTokenAmount);
       // 발행될 LP 토큰의 개수를 구한다.
       // 유동성 공급자가 보내는 이더리움의 개수가 현재 풀에서 얼마나 차지하는지 비율을 구해 LP토큰의 발행량을 구한다.
-      // uint256 liquidityToken = totalLiquidity * msg.value / ethAmount;
-      // _mint(msg.sender,liquidityToken); (임시)
+      uint256 liquidityToken = totalLiquidity * msg.value / ethAmount;
+      _mint(msg.sender,liquidityToken);
     }else{
       // 유동성이 없었을 때
       // 입력받은 토큰의 개수만큼 
       uint tokenAmount = _maxToken;
       // 가지고 있는 이더리움의 개수
       uint initLiquidity = address(this).balance;
-      // 가지고 있던 이더리움의 개수 만큼 토큰을 발행한다.(임시)
-      // _mint(msg.sender, initLiquidity);
+      // 가지고 있던 이더리움의 개수 만큼 토큰을 발행한다.(Uniswap v1에서 단순하게 하기 위해 공급된 이더리움 개수와 맞춰서 LP토큰을 발행하는 함)
+      _mint(msg.sender, initLiquidity);
       // 유동성 공급자가 가지고 있는 토큰을 Liquidity 컨트랙트에게 보낸다(공급한다)
       token.transferFrom(msg.sender, address(this), tokenAmount);
     }
 
-    // 유동성 공급자가 풀에 들고 있는 총 유동성에 현재 추가하는 양 더해주기
-    // 1. 현재 풀에 들고 있는 이더리움의 양
-    uint256 ethAmount = address(msg.value).balance;
-    // 2. 현재 풀에 들고 있는 이더리움의 비중
-    uint256 liquidityToken = totalLiquidity * ethAmount/ totalLiquidity;
-    liquidityProvider[msg.sender] = liquidityToken;
-
     // 해당 함수 호출 시 ERC20토큰의 수량과 이더리움을 함께 받습니다.
     //TODO 사용자 address에 liquidity 기록하기
-
   }
 
-  function getLiquidity (address provider) public view returns(uint256){
+  function removeLiquidity(uint256 _lpTokenAmount) public {
+    // 1. 전체 WEMIX의 개수를 가져온다.
+    uint256 totalLiquidity = totalSupply();
+    // 2. 유동성 공급자가 받아갈 WEMEI의 개수
+    uint256 wemixAmount = _lpTokenAmount * address(this).balance / totalLiquidity;
+    // 3. 유동성 공급자가 받아갈 토큰의 개수
+    uint256 tokenAmount = _lpTokenAmount * token.balanceOf(address(this)) / totalLiquidity;
+    // 4. LP토큰을 소각한다
+    _burn(msg.sender, _lpTokenAmount);
+    // 5. 유동성 공급자에게 WEMIX 코인을 보내준다.
+    payable(msg.sender).transfer(wemixAmount);
+    // 6. 유동성 공급자에게 토큰을 보내준다.
+    token.transfer(msg.sender, tokenAmount);
+  }
+
+
+  function getLiquidityAmount (address provider) public view returns(uint256){
     return liquidityProvider[provider];
   }
   
@@ -100,7 +110,8 @@ contract Liquidity is ILiquidity, ERC20{
     require(outputAmount >= _minCoin , "lack of amount");
     // 사용자가 토큰을 Liquidity(컨트랙트)에게 보내게한다.
     emit SwapTokenToToken(msg.sender, address(this), _tokenAmount);
-    IERC20(token).transferFrom(msg.sender, address(this),_tokenAmount);
+    // IERC20(token).approve(address(this), _tokenAmount);
+    IERC20(token).transferFrom(msg.sender, address(this), _tokenAmount);
     // 이더를 보낸다. 함수를 호출한 사용자에게
     // payable(msg.sender) : https://ethereum.stackexchange.com/questions/113243/payablemsg-sender
     payable(msg.sender).transfer(outputAmount);
@@ -116,3 +127,6 @@ contract Liquidity is ILiquidity, ERC20{
     return numerator/denominator;
   }
 }
+
+
+//TODO TokenToToken
