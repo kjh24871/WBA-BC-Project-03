@@ -8,6 +8,8 @@ import "./ILiquidity.sol";
 contract Liquidity is ILiquidity, ERC20{
 
   IERC20 token;
+  // 유동성 공급자의 유동성 공급량을 저장하기 위함
+  mapping(address => uint256) public liquidityProvider;
 
   //TODO 사용자 address에 liquidity mapping한 값 가지고 있기
   event SwapTokenToToken(address caller, address to, uint256 amount);
@@ -19,34 +21,56 @@ contract Liquidity is ILiquidity, ERC20{
   // [CPMM을 적용한 유동성 공급]
   // 공급 시 유동성 공급자는 Lp토큰을 받는다.(임시)
   // 조건 : 공급되는 코인과 토큰의 양은 1대1 비율로 공급되어야한다. 
-  function addLiquidity(uint256 _amount) public payable{
+  function addLiquidity(uint256 _maxToken) public payable{
     //  해당 풀이 가지고 있는 전체 공급량
     uint256 totalLiquidity = totalSupply();
     // 기존에 유동성이 존재할 떄
+    // 예를들어 현재 풀에 코인 1000개, 토큰 500개가 있다.
+    // 유동성 공급자가 추가로 200개의 이더리움을 공급하면 100개의 토큰이 함께 공급되어야 한다.
+
     if (totalLiquidity > 0){
+      // 현재 풀에 존재하는 이더리움의 개수를 구한다.
       uint256 ethAmount = address(this).balance - msg.value;
+      // 현재 풀에 존재하는 토큰의 개수를 구한다.
       uint256 tokenAmount = token.balanceOf(address(this));
-      // 유동성 공급하려는 토큰의 개수
+      // 실제 유동성 공급하려는 토큰의 개수를 몇개를 집어넣을지 비율을 구해야한다.
+      // 200 x (500/1000)
       uint256 inputTokenAmount = msg.value * tokenAmount / ethAmount;
-      require(_amount >= inputTokenAmount);
+      // 사용자가 입력한 토큰보다 적은 양을 liquidity 컨트랙트가 가져올 수 있도록 조건을 설정한다.
+      require(_maxToken >= inputTokenAmount);
       token.transferFrom(msg.sender, address(this), inputTokenAmount);
-      uint256 liquidityToken = totalLiquidity * msg.value / ethAmount;
+      // 발행될 LP 토큰의 개수를 구한다.
+      // 유동성 공급자가 보내는 이더리움의 개수가 현재 풀에서 얼마나 차지하는지 비율을 구해 LP토큰의 발행량을 구한다.
+      // uint256 liquidityToken = totalLiquidity * msg.value / ethAmount;
       // _mint(msg.sender,liquidityToken); (임시)
     }else{
       // 유동성이 없었을 때
       // 입력받은 토큰의 개수만큼 
-      uint tokenAmount = _amount;
+      uint tokenAmount = _maxToken;
       // 가지고 있는 이더리움의 개수
       uint initLiquidity = address(this).balance;
       // 가지고 있던 이더리움의 개수 만큼 토큰을 발행한다.(임시)
       // _mint(msg.sender, initLiquidity);
+      // 유동성 공급자가 가지고 있는 토큰을 Liquidity 컨트랙트에게 보낸다(공급한다)
       token.transferFrom(msg.sender, address(this), tokenAmount);
     }
+
+    // 유동성 공급자가 풀에 들고 있는 총 유동성에 현재 추가하는 양 더해주기
+    // 1. 현재 풀에 들고 있는 이더리움의 양
+    uint256 ethAmount = address(msg.value).balance;
+    // 2. 현재 풀에 들고 있는 이더리움의 비중
+    uint256 liquidityToken = totalLiquidity * ethAmount/ totalLiquidity;
+    liquidityProvider[msg.sender] = liquidityToken;
 
     // 해당 함수 호출 시 ERC20토큰의 수량과 이더리움을 함께 받습니다.
     //TODO 사용자 address에 liquidity 기록하기
 
   }
+
+  function getLiquidity (address provider) public view returns(uint256){
+    return liquidityProvider[provider];
+  }
+  
   // Exchange 컨트랙트가 현재 가지고 있는 이더리움의 개수를 보여주기 위함입니다.
   function getBalance() public view returns(uint256){
     return address(this).balance;
