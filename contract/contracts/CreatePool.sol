@@ -9,7 +9,16 @@ contract LiquidityFactory{
 	address public owner;
 	mapping (address => Liquidity) public contracts;
 	mapping (string => address) poolAddress;
+	string[] poolName;
 
+	//정보 반환횽 구조체
+	struct info{
+		address poolAddress;
+		string poolName;
+		uint256 totalLiquidity;
+		uint256 amountTokenA;
+		uint256 amountTokenB;
+	}
 	constructor(){
 		owner = msg.sender;
 	}
@@ -29,13 +38,25 @@ contract LiquidityFactory{
 		// "토큰심볼-ETH"(나중에 WEMIX로 바꾸면 좋겠습니다)이라는 풀이름을 만들어줍니다. (필요할지 모르겠는데 주소 찾을때 이름으로 찾는게 편할것 같아 넣어봤습니다)
 		string memory tokenName = ERC20(_tokenAddress).symbol();
 		string memory name = string(bytes.concat(bytes(tokenName), "-ETH"));
+		poolName.push(name);
 		contracts[address(l)] = l;
 		poolAddress[name] = address(l);
 		return l;
 	}
 
-	//pool 목록 반환
-	// function getLiquidityList() public view returns (mapping(string => address) memory){
-	// 	return poolAddress;
-	// }
+	// pool 목록 반환
+	function getLiquidityList() public view returns (info[] memory){
+		info[] memory list;
+		for (uint i = 0 ; i < poolName.length; i++){
+			(uint256 liquidity, uint256 amountTokenA, uint256 amountTokenB) = contracts[poolAddress[poolName[i]]].getLiquidity();
+			list[i] = info(
+				poolAddress[poolName[i]],
+				poolName[i],
+				liquidity,
+				amountTokenA,
+				amountTokenB
+				);
+		}
+		return list;
+	}
 }
