@@ -13,7 +13,7 @@ interface ILiquidity{
   // 전체 풀의 liquidity: x, 내가 뺴려는 liquidty: y
   // 풀에 전체 토큰, 코인이 x1, x2 , -> x1 * y/x, x2* y/x
   // 전체 liquidity 수정
-  function swapTokensToCoin(uint256 _tokenAmount, uint256 _minCoin) external payable;			//
+  function swapTokenToCoin(uint256 _tokenAmount, uint256 _minCoin) external payable;			//
   function swapCoinToToken(uint256 _minToken) external payable;  // O
   // getSwapRatio로 가격 가져와서 swap
   // 수수료 wemex 1개
@@ -30,7 +30,8 @@ interface ILiquidity{
   // -> function pullReward()external;
   // 리워드 전송
   // 리퀴디티 비율에 따라
-  event Transfer(address indexed from, address indexed to, uint value);
+  // event Transfer(address indexed from, address indexed to, uint value);
+  // event SwapTokenToToken(address caller, address to, uint256 amount);
 }
 
 

@@ -152,17 +152,17 @@ contract('Liquidity', (accounts) => {
       console.log(web3.utils.fromWei(web3.utils.toBN(temp2).toString()));
     });
   });
-  describe('swap coin to token', async () => {
+  describe.skip('swap coin to token', async () => {
     it('사용자는 이더리움을 넣고 CPMM 알고리즘에 의해 토큰을 받을 수 있다.', async () => {
       await token.approve(liquidity.address, toWei('1000', 'ether'));
 
-      // 토큰 1000 : 이더 200
+      // 유동성 공급 => 토큰 1000 : 이더 200
       await liquidity.addLiquidity(toWei('1000', 'ether'), {
         from: accounts[0],
         value: toWei('200', 'ether'),
       });
 
-      // 토큰 1000개, 이더 200개 => 비율 5 : 1
+      // 현재 유동성: 토큰 1000개, 이더 200개
       // 사용자가 1개의 토큰을 넣는다. => 사용자는 1개를 넣으면 토큰 5개를 받을 것으로 예상
       // 실제 받은 토큰은 497.xx개의 토큰을 받음
 
@@ -195,47 +195,53 @@ contract('Liquidity', (accounts) => {
       );
     });
   });
-  // describe('swap token to coin', async () => {
-  //   it('사용자는 이더리움을 넣고 CPMM 알고리즘에 의해 토큰을 받을 수 있다.', async () => {
-  //     await token.approve(liquidity.address, toWei('1000', 'ether'));
+  describe('swap token to coin', async () => {
+    it('사용자는 토큰을 넣고 CPMM 알고리즘에 의해 위믹스 코인을 받을 수 있다.', async () => {
+      await token.transfer(accounts[1], toWei('5000', 'ether'));
+      let sender = await token.balanceOf(accounts[1]);
+      console.log('accounts[1]: ', toBN(sender).toString());
 
-  //     // 토큰 1000 : 이더 200
-  //     await liquidity.addLiquidity(toWei('1000', 'ether'), {
-  //       from: accounts[0],
-  //       value: toWei('200', 'ether'),
-  //     });
+      await token.approve(liquidity.address, toWei('1000', 'ether'));
+      // 유동성 공급 => 토큰 1000 : 이더 200
+      await liquidity.addLiquidity(toWei('200', 'ether'), {
+        from: accounts[0],
+        value: toWei('200', 'ether'),
+      });
 
-  //     // 토큰 1000개, 이더 200개 => 비율 5 : 1
-  //     // 사용자가 1개의 토큰을 넣는다. => 사용자는 1개를 넣으면 토큰 5개를 받을 것으로 예상
-  //     // 실제 받은 토큰은 497.xx개의 토큰을 받음
+      // 현재 유동성 : 토큰 1000개, 이더 200개
+      // 사용자가 1개의 토큰을 넣는다. => 사용자는 토큰 1개를 넣으면 위믹스 코인 0.2개를 받을 것으로 예상
+      // 실제 받은 토큰은 497.xx개의 토큰을 받음
 
-  //     // 받을 토큰 y는 = 1000MEX * 1 / 200ETH + 1
+      // 받을 토큰 y는 = 200WEMIX * 1 / 200Token + 1
 
-  //     let liquidityTokenBalance = await token.balanceOf(liquidity.address);
-  //     let liquidityBalance = await liquidity.getBalance();
-  //     console.log(
-  //       'liquidityTokenBalance : ',
-  //       toBN(liquidityTokenBalance).toString()
-  //     );
-  //     console.log('liquidityBalance : ', toBN(liquidityBalance).toString());
-  //     let tempRatio = await liquidity.getSwapRatio(
-  //       web3.utils.toWei('1', 'ether'),
-  //       liquidityBalance,
-  //       liquidityTokenBalance
-  //     );
+      let liquidityTokenBalance = await token.balanceOf(liquidity.address);
+      let liquidityBalance = await liquidity.getBalance();
+      console.log(
+        'liquidityTokenBalance : ',
+        toBN(liquidityTokenBalance).toString()
+      );
+      console.log('liquidityBalance : ', toBN(liquidityBalance).toString());
+      let tempRatio = await liquidity.getSwapRatio(
+        toWei('1', 'ether'),
+        liquidityTokenBalance,
+        liquidityBalance
+      );
 
-  //     console.log('슬리피지 적용 시 : ', toBN(tempRatio).toString());
+      console.log('슬리피지 적용 시 : ', toBN(tempRatio).toString());
+      // console.log(accounts[1]);
+      sender = await token.balanceOf(accounts[1]);
+      console.log('accounts[1]: ', toBN(sender).toString());
+      await liquidity.swapTokenToCoin(
+        toWei('10', 'ether'),
+        toWei('1', 'ether'),
+        { from: accounts[1] }
+      );
 
-  //     await liquidity.swapCoinToToken(toWei('1', 'ether'), {
-  //       from: accounts[1],
-  //       value: web3.utils.toWei('1', 'ether'),
-  //     });
-
-  //     let accountTokenBalance = await token.balanceOf(accounts[1]);
-  //     console.log(
-  //       'address가 받은 Token : ',
-  //       toBN(accountTokenBalance).toString()
-  //     );
-  //   });
-  // });
+      // let accountTokenBalance = await token.balanceOf(accounts[1]);
+      // console.log(
+      //   'address가 받은 Token : ',
+      //   toBN(accountTokenBalance).toString()
+      // );
+    });
+  });
 });

@@ -2,23 +2,50 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./ILiquidity.sol";
 
-contract Liquidity is ILiquidity{
+contract Liquidity is ILiquidity, ERC20{
 
   IERC20 token;
 
   //TODO 사용자 address에 liquidity mapping한 값 가지고 있기
+  event SwapTokenToToken(address caller, address to, uint256 amount);
 
   // 풀을 만들고자하는 토큰의 주소를 초기값으로 받습니다.
-  constructor (address _token){
+  constructor (address _token) ERC20("lpToken","LP"){
     token = IERC20(_token);
   }
-  // 유동성 공급을 위한 함수
+  // [CPMM을 적용한 유동성 공급]
+  // 공급 시 유동성 공급자는 Lp토큰을 받는다.(임시)
+  // 조건 : 공급되는 코인과 토큰의 양은 1대1 비율로 공급되어야한다. 
   function addLiquidity(uint256 _amount) public payable{
+    //  해당 풀이 가지고 있는 전체 공급량
+    uint256 totalLiquidity = totalSupply();
+    // 기존에 유동성이 존재할 떄
+    if (totalLiquidity > 0){
+      uint256 ethAmount = address(this).balance - msg.value;
+      uint256 tokenAmount = token.balanceOf(address(this));
+      // 유동성 공급하려는 토큰의 개수
+      uint256 inputTokenAmount = msg.value * tokenAmount / ethAmount;
+      require(_amount >= inputTokenAmount);
+      token.transferFrom(msg.sender, address(this), inputTokenAmount);
+      uint256 liquidityToken = totalLiquidity * msg.value / ethAmount;
+      // _mint(msg.sender,liquidityToken); (임시)
+    }else{
+      // 유동성이 없었을 때
+      // 입력받은 토큰의 개수만큼 
+      uint tokenAmount = _amount;
+      // 가지고 있는 이더리움의 개수
+      uint initLiquidity = address(this).balance;
+      // 가지고 있던 이더리움의 개수 만큼 토큰을 발행한다.(임시)
+      // _mint(msg.sender, initLiquidity);
+      token.transferFrom(msg.sender, address(this), tokenAmount);
+    }
+
     // 해당 함수 호출 시 ERC20토큰의 수량과 이더리움을 함께 받습니다.
     //TODO 사용자 address에 liquidity 기록하기
-    token.transferFrom(msg.sender, address(this), _amount);
+
   }
   // Exchange 컨트랙트가 현재 가지고 있는 이더리움의 개수를 보여주기 위함입니다.
   function getBalance() public view returns(uint256){
@@ -42,12 +69,13 @@ contract Liquidity is ILiquidity{
 
   // _tokenAmount : 몇개의 토큰을 바꿀껀지
   // _minCoin : 슬리피지가 입력된 값
-  function swapTokensToCoin(uint256 _tokenAmount, uint256 _minCoin) public payable{
+  function swapTokenToCoin(uint256 _tokenAmount, uint256 _minCoin) public payable{
     // Liquidity 컨트랙트가 가지고 있는 토큰의 양, 코인의 양 
     uint256 outputAmount = getSwapRatio(_tokenAmount, token.balanceOf(address(this)), address(this).balance);
     // 입력받은 슬리피지보다 많이 받아야한다.
     require(outputAmount >= _minCoin , "lack of amount");
     // 사용자가 토큰을 Liquidity(컨트랙트)에게 보내게한다.
+    emit SwapTokenToToken(msg.sender, address(this), _tokenAmount);
     IERC20(token).transferFrom(msg.sender, address(this),_tokenAmount);
     // 이더를 보낸다. 함수를 호출한 사용자에게
     // payable(msg.sender) : https://ethereum.stackexchange.com/questions/113243/payablemsg-sender
