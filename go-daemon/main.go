@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	conf "lecture/go-daemon/config"
-	"lecture/go-daemon/model"
+	conf "go-daemon/config"
+	"go-daemon/model"
 	"log"
 	"math/big"
 	"time"
@@ -16,7 +16,7 @@ import (
 
 func main() {
 	// config 초기화
-	cf := conf.GetConfig("./config/config.toml")
+	cf := conf.GetConfig("../config.toml")
 
 	// model 초기화
 	md, err := model.NewModel(cf.DB.Host)
@@ -34,7 +34,7 @@ func main() {
 	MaxRetries := 5
 	dialRetries := MaxRetries
 	logs := make(chan types.Log)
-	contractAddress := common.HexToAddress("0x5EB03830c5335589cf58793caEE99921B5735cda")
+	contractAddress := common.HexToAddress("배포한 컨트랙트 주소")
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
 	}

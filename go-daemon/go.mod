@@ -1,4 +1,4 @@
-module lecture/go-daemon
+module go-daemon
 
 go 1.18
 
