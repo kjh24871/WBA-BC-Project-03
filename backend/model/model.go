@@ -214,14 +214,14 @@ func (p *Model) GetTokenWithAddress(address string) *big.Int {
 }
 
 func (p *Model) TransferCoinWithAddress(address string, value int64) string {
-	return p.BlockchainCreateTransferTx("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939", address, value)
+	return p.BlockchainCreateTransferTx("유저의 pk", address, value)
 }
 
 func (p *Model) TransferCoinWithPK(address string, pk string, value int64) string {
 	return p.BlockchainCreateTransferTx(pk, address, value)
 }
 func (p *Model) TransferTokenWithAddress(address string, value int64) string {
-	return p.ContractCreateTransferTx("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939", address, value)
+	return p.ContractCreateTransferTx("유저의 pk", address, value)
 }
 
 func (p *Model) TransferTokenWithPK(address string, pk string, value int64) string {
