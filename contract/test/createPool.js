@@ -20,7 +20,6 @@ contract('LiquidityFactory', (accounts) => {
   describe('newLiquidity', async function() {
     it('newLiquidity는 새로운 토큰주소를 입력 받는다.', async function() {
       let tokenAddress = await token.address;
-      // token은 처음에 100를 가지고 있다.
       liquidityFactory.newLiquidity(tokenAddress)
     });
   });
