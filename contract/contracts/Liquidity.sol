@@ -33,9 +33,7 @@ contract Liquidity is ERC20{
         actualAmountA = _desiredAmountA;
       }
     }
-    tokenA.approve(address(this), actualAmountA);
     tokenA.transferFrom(msg.sender, address(this), actualAmountA);
-    tokenB.approve(address(this), actualAmountB);
     tokenB.transferFrom(msg.sender, address(this), actualAmountB);
     _mint(msg.sender, actualAmountB);
     emit AddLiquidity(msg.sender, actualAmountB);
@@ -44,13 +42,13 @@ contract Liquidity is ERC20{
 
   function removeLiquidity(uint256 _amount) public returns(uint256 outputA, uint256 outputB){
     uint256 balance = balanceOf(msg.sender);
-    require(_amount >= balance, "balance is not enough");
+    require(_amount <= balance, "balance is not enough");
     uint256 totalSupply = totalSupply();
     outputA = tokenA.balanceOf(address(this)) * _amount / totalSupply;
-    outputA = tokenA.balanceOf(address(this)) * _amount / totalSupply;
+    outputB = tokenB.balanceOf(address(this)) * _amount / totalSupply;
     
-    tokenA.transferFrom(address(this), msg.sender, outputA);
-    tokenB.transferFrom(address(this), msg.sender, outputB);
+    tokenA.transfer(msg.sender, outputA);
+    tokenB.transfer(msg.sender, outputB);
     _burn(msg.sender, _amount);
     emit RemoveLiquidity(msg.sender, _amount);
     return (outputA, outputB);
@@ -62,7 +60,7 @@ contract Liquidity is ERC20{
     outputAmount = getSwapRatio(_inputAmount, inputToken.balanceOf(address(this)), outputToken.balanceOf(address(this)));
 
     inputToken.transferFrom(msg.sender, address(this), _inputAmount);
-    outputToken.transferFrom(address(this), msg.sender, _inputAmount);
+    outputToken.transfer(msg.sender, outputAmount);
     emit Swap(msg.sender, address(inputToken), address(outputToken), _inputAmount, outputAmount);
     return outputAmount;
 }
