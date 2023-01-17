@@ -78,5 +78,10 @@ func (p *Router) Idx() *gin.Engine {
 		account.POST("/token/myPK", p.ct.TransferTokenWithAddress)
 		account.POST("/token/otherPK", p.ct.TransferTokenWithPK)
 	}
+	pool := e.Group("/pool", liteAuth())
+	{
+		pool.PUT("",p.ct.AddLiquidity)
+		pool.GET("",p.ct.BalanceOf)
+	}
 	return e
 }

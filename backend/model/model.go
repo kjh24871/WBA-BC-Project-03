@@ -5,9 +5,8 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
-	"math/big"
-
 	contracts "final/backend/contract"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -23,6 +22,7 @@ type Model struct {
 	client       *ethclient.Client
 	tokenAddress common.Address //컨트랙트 어드레스
 	ownerAddress common.Address //내 지갑 주소
+	liquidityAddress common.Address
 }
 
 func NewModel() (*Model, error) {
@@ -32,8 +32,9 @@ func NewModel() (*Model, error) {
 	if err != nil {
 		fmt.Println("client error")
 	}
-	r.tokenAddress = common.HexToAddress("0xE42f6266a0E88b4160413d2c182D25F3a74F5472")
+	r.tokenAddress = common.HexToAddress("0x5EB03830c5335589cf58793caEE99921B5735cda")
 	r.ownerAddress = common.HexToAddress("0x15A67B0bB392b2978bFeDBC67809A562d7045767")
+	r.liquidityAddress = common.HexToAddress("0x595b154e719feB07165A574b51FDC7717E6F9129")
 	return r, err
 }
 
@@ -126,6 +127,7 @@ func (p *Model) ContractCreateTransferTx(pk string, dstAddress string, amount in
 	}
 	// 전송할 양, gasLimit, gasPrice 설정. 추천되는 gasPrice를 가져옴
 	value := big.NewInt(amount * 1000000000000000000)
+	fmt.Println("value : " ,value)
 	// value := big.NewInt(700000000000000000)
 	gasPrice, err := p.client.SuggestGasPrice(context.Background())
 	if err != nil {
@@ -136,7 +138,7 @@ func (p *Model) ContractCreateTransferTx(pk string, dstAddress string, amount in
 	toAddress := common.HexToAddress(dstAddress)
 
 	// 컨트랙트 전송시 사용할 함수명
-	transferFnSignature := []byte("balanceOf(address,uint256)")
+	transferFnSignature := []byte("transfer(address,uint256)")
 	hash := sha3.NewLegacyKeccak256()
 	hash.Write(transferFnSignature)
 	methodID := hash.Sum(nil)[:4]
@@ -214,14 +216,14 @@ func (p *Model) GetTokenWithAddress(address string) *big.Int {
 }
 
 func (p *Model) TransferCoinWithAddress(address string, value int64) string {
-	return p.BlockchainCreateTransferTx("유저의 pk", address, value)
+	return p.BlockchainCreateTransferTx("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939", address, value)
 }
 
 func (p *Model) TransferCoinWithPK(address string, pk string, value int64) string {
 	return p.BlockchainCreateTransferTx(pk, address, value)
 }
 func (p *Model) TransferTokenWithAddress(address string, value int64) string {
-	return p.ContractCreateTransferTx("유저의 pk", address, value)
+	return p.ContractCreateTransferTx("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939", address, value)
 }
 
 func (p *Model) TransferTokenWithPK(address string, pk string, value int64) string {
