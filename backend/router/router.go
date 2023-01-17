@@ -55,12 +55,12 @@ func (p *Router) Idx() *gin.Engine {
 		// 사용자
 		dex.GET("/all", p.ct.GetAllPools) // 1. 사용 가능한 풀 목록 조회
 		dex.GET("/my", p.ct.GetMyPools)   // 2. 자산이 예치된 풀 목록 조회
-		pool := dex.Group("/pool/:pool_name")
+		pool := dex.Group("/pool")
 		{
 			pool.PUT("", p.ct.AddLiquidity)
-			pool.DELETE("", p.ct.RemoveLiquidity)
+			// pool.DELETE("", p.ct.RemoveLiquidity)
 		}
-		dex.POST("/swap", p.ct.Swap)
+		// dex.POST("/swap", p.ct.Swap)
 
 		//관리자
 		dex.POST("", p.ct.CreateLiquidity) // 1. 새로운 풀 생성

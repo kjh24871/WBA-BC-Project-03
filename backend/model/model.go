@@ -21,6 +21,7 @@ import (
 type Model struct {
 	client       *ethclient.Client
 	tokenAddress common.Address //컨트랙트 어드레스
+	token2Address common.Address
 	ownerAddress common.Address //내 지갑 주소
 	liquidityAddress common.Address
 }
@@ -32,9 +33,10 @@ func NewModel() (*Model, error) {
 	if err != nil {
 		fmt.Println("client error")
 	}
-	r.tokenAddress = common.HexToAddress("0x5EB03830c5335589cf58793caEE99921B5735cda")
+	r.tokenAddress = common.HexToAddress("0xB451E9Fd9114611e88B257D04A62D22a86FFA1c2")
+	r.token2Address = common.HexToAddress("0xD2C1ea8092E2417d140510d6568292e49aa1Bef2")
 	r.ownerAddress = common.HexToAddress("0x15A67B0bB392b2978bFeDBC67809A562d7045767")
-	r.liquidityAddress = common.HexToAddress("0x595b154e719feB07165A574b51FDC7717E6F9129")
+	r.liquidityAddress = common.HexToAddress("0x639e1243125e2081975FBF303e5ee682020c593a")
 	return r, err
 }
 

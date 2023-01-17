@@ -35,19 +35,21 @@ func (p *Controller) BalanceOf(c *gin.Context) {
 }
 
 func (p *Controller) AddLiquidity(c *gin.Context) {
-	amount := c.Query("amount")
-	intAmount, _ := strconv.ParseInt(amount, 10, 64)
-	c.JSON(200, p.md.AddLiquidity(intAmount))
+	amountA := c.Query("amountA")
+	amountB := c.Query("amountB")
+	intAmountA, _ := strconv.ParseInt(amountA, 10, 64)
+	intAmountB, _ := strconv.ParseInt(amountB, 10, 64)
+	c.JSON(200, p.md.AddLiquidity(intAmountA, intAmountB))
 }
 
-func (p *Controller) RemoveLiquidity(c *gin.Context) {
-	amount := c.Query("amount")
-	intAmount, _ := strconv.ParseInt(amount, 10, 64)
-	c.JSON(200, p.md.AddLiquidity(intAmount))
-}
+// func (p *Controller) RemoveLiquidity(c *gin.Context) {
+// 	amount := c.Query("amount")
+// 	intAmount, _ := strconv.ParseInt(amount, 10, 64)
+// 	c.JSON(200, p.md.AddLiquidity(intAmount))
+// }
 
 func (p *Controller) Swap(c *gin.Context) {
 	amount := c.Query("amount")
 	intAmount, _ := strconv.ParseInt(amount, 10, 64)
-	c.JSON(200, p.md.AddLiquidity(intAmount))
+	protocol.Success(200).Response(c)
 }
