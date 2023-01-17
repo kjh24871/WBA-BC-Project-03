@@ -16,43 +16,38 @@ func NewCTL(rep *model.Model) (*Controller, error) {
 	return r, nil
 }
 
-func (p *Controller) GetSymbolByToken(c *gin.Context) {
-	name := c.Query("name")
-	c.JSON(200, p.md.GetSymbolByToken(name))
+func (p *Controller) GetAllPools(c *gin.Context) {
+
 }
 
-func (p *Controller) GetAddressToken(c *gin.Context) {
-	address := c.Query("address")
-	c.JSON(200, p.md.GetTokenWithAddress(address))
+func (p *Controller) GetMyPools(c *gin.Context) {
+
 }
 
-func (p *Controller) TransferCoinWithAddress(c *gin.Context) {
-	address := c.Query("address")
-	value := c.Query("value")
-	intValue, _ := strconv.ParseInt(value, 10, 64)
-	c.JSON(200, p.md.TransferCoinWithAddress(address, intValue))
+func (p *Controller) CreateLiquidity(c *gin.Context) {
+
 }
 
-func (p *Controller) TransferCoinWithPK(c *gin.Context) {
-	address := c.Query("address")
-	pk := c.Query("pk")
-	value := c.Query("value")
-	intValue, _ := strconv.ParseInt(value, 10, 64)
-	c.JSON(200, p.md.TransferCoinWithPK(address, pk, intValue))
+func (p *Controller) BalanceOf(c *gin.Context) {
+	// address := c.Query("address")
+	// c.JSON(200, p.md.BalanceOf(address)) ==
+	// protocl.Success(200).Response(c)
 }
 
-func (p *Controller) TransferTokenWithAddress(c *gin.Context) {
-	address := c.Query("address")
-	value := c.Query("value")
-	intValue, _ := strconv.ParseInt(value, 10, 64)
-	c.JSON(200, p.md.TransferTokenWithAddress(address, intValue))
+func (p *Controller) AddLiquidity(c *gin.Context) {
+	amount := c.Query("amount")
+	intAmount, _ := strconv.ParseInt(amount, 10, 64)
+	c.JSON(200, p.md.AddLiquidity(intAmount))
 }
 
-func (p *Controller) TransferTokenWithPK(c *gin.Context) {
-	address := c.Query("address")
-	pk := c.Query("pk")
-	value := c.Query("value")
-	intValue, _ := strconv.ParseInt(value, 10, 64)
-	c.JSON(200, p.md.TransferTokenWithPK(address, pk, intValue))
+func (p *Controller) RemoveLiquidity(c *gin.Context) {
+	amount := c.Query("amount")
+	intAmount, _ := strconv.ParseInt(amount, 10, 64)
+	c.JSON(200, p.md.AddLiquidity(intAmount))
 }
 
+func (p *Controller) Swap(c *gin.Context) {
+	amount := c.Query("amount")
+	intAmount, _ := strconv.ParseInt(amount, 10, 64)
+	c.JSON(200, p.md.AddLiquidity(intAmount))
+}
