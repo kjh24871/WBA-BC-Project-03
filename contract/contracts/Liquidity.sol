@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Liquidity is ERC20{
   IERC20 tokenA;
@@ -13,7 +13,12 @@ contract Liquidity is ERC20{
   event Swap(address caller, address input, address output, uint256 inputAmount, uint256 outputAmount);
   event AddLiquidity(address caller, uint256 amount);
   event RemoveLiquidity(address caller, uint256 amount);
-  constructor (address _tokenA, address _tokenB) ERC20("lpToken", "LP"){
+  constructor (
+    address _tokenA, 
+    address _tokenB, 
+    string memory name, 
+    string memory sym
+    ) ERC20(name, sym){
     tokenA = IERC20(_tokenA);
     tokenB = IERC20(_tokenB);
   }
@@ -98,6 +103,12 @@ contract Liquidity is ERC20{
         }
     }
     return false;
+  }
+  function getLiquidity() public view returns (uint256 liquidity, uint256 amountA, uint256 amountB){
+    liquidity = totalSupply();
+    amountA = tokenA.balanceOf(address(this));
+    amountB = tokenB.balanceOf(address(this));
+    return (liquidity, amountA, amountB);
   }
 }
 
