@@ -4,16 +4,19 @@ const { ethers, providers } = require('ethers');
 
 const web3 = require('web3');
 const { toWei, toBN, fromWei } = web3.utils;
-const Token = artifacts.require('WEMEXToken');
+const dummy1 = artifacts.require('dummyToken1');
+const dummy2 = artifacts.require('dummyToken2');
 
 contract('Liquidity', (accounts) => {
-  let token;
+  let dum1;
+  let dum2;
   let liquidity;
   // contract() 실행 후 & 내부의 테스트 함수들이 실행되기 전에 실행되는 부분
   before(async () => {
     console.log(accounts);
-    token = await Token.deployed();
-    console.log('Token Contract Address:', token.address);
+    dum1 = await dummy1.deployed();
+    dum2 = await dummy2.deployed();
+    // console.log('Token Contract Address:', dummy1.address);
     liquidity = await Liquidity.deployed();
     console.log('exchangeInstance Address', liquidity.address);
   });
@@ -32,62 +35,93 @@ contract('Liquidity', (accounts) => {
       );
     });
   });
-  describe.skip('유동성 공급', async () => {
-    it('유동성 공급한다. (유동성이 0인 상태)', async () => {
-      // liquidity 컨트랙트에게 500개의 WEMEX토큰을 사용할 수 있도록 승인
-      await token.approve(liquidity.address, toWei('1000', 'ether'));
-      // 유동성 공급자는 500개의 WEMEX 토큰과 1000개의 이더리움을 Exchange 컨트랙트에 유동성 공급한다.
-      await liquidity.addLiquidity(toWei('1000', 'ether'), {
-        value: toWei('500', 'ether'),
-      });
-      // Exchange 컨트랙트의 잔고는 1000이더가 있어야한다.
-      let exchangeBalance = await liquidity.getBalance();
-      expect(toBN(exchangeBalance).toString()).to.equal(toWei('500', 'ether'));
+  describe('유동성 공급 (유동성 0일때)', async () => {
+    it('유동성 공급한다.', async () => {
+      // liquidity 컨트랙트에게 10개의 WEMEX토큰을 사용할 수 있도록 승인
+      await dum1.approve(liquidity.address, web3.utils.toWei('10', 'ether'));
+      await dum2.approve(liquidity.address, web3.utils.toWei('20', 'ether'));
+      // token.transferFrom(msg.sender, address(this), _amount);
 
-      //  Exchange 컨트랙트에 들어간 토큰 개수는 500개여야한다.
-      var balance = await token.balanceOf(liquidity.address);
-      expect(toBN(balance).toString()).to.equal(toWei('1000', 'ether'));
-    });
-    it('유동성을 공급한다.(기존에 유동성이 들어가 있는 상태)', async () => {
-      await token.approve(liquidity.address, toWei('100', 'ether'));
-      await liquidity.addLiquidity(toWei('1', 'ether'), {
-        value: toWei('1', 'ether'),
-      });
-      let exchangeBalance = await liquidity.getBalance();
-      // expect(toBN(exchangeBalance).toString()).to.equal(toWei('1200', 'ether'));
-      console.log(toBN(exchangeBalance).toString());
-      //  Exchange 컨트랙트에 들어간 토큰 개수는 500개여야한다.
-      var balance = await token.balanceOf(liquidity.address);
-      console.log(toBN(balance).toString());
-      // expect(toBN(balance).toString()).to.equal(toWei('600', 'ether'));
-    });
-  });
-  describe.skip('스왑 ', async () => {
-    it('사용자가 이더를 주면 그 양만큼 토큰을 준다.', async () => {
-      // liquidity 컨트랙트에게 100개의 WEMEX토큰을 사용할 수 있도록 승인
-      await token.approve(liquidity.address, web3.utils.toWei('100', 'ether'));
-      // 유동성 공급자는 70개의 WEMEX 토큰과 10개의 이더리움을 Exchange 컨트랙트에 유동성 공급한다.
-      await liquidity.addLiquidity(web3.utils.toWei('70', 'ether'), {
-        value: web3.utils.toWei('10', 'ether'),
-      });
-
-      // account[1] 사용자가 5이더를 Exchange 컨트랙트에게 WEMEX 토큰 5개로 바꿔달라고 한다.
-      await liquidity.ethToERC20CSMMSwap({
-        from: accounts[1],
-        value: web3.utils.toWei('5', 'ether'),
-      });
-
-      // Exchange 컨트랙트는 앞서 유동성 공급자에게 2개의 이더를 받았고, 최근 유동성 공급자에게 10개를 추가로 받았다.
-      // 그리고 사용자에게 스왑을 위해 5개의 이더를 추가로 받았다.
-      let exchangeBalance = await liquidity.getBalance();
-      expect(web3.utils.toBN(exchangeBalance).toString()).to.equal(
-        web3.utils.toWei('17', 'ether')
+      // 유동성 공급자는 10개의 dummy1 토큰과 20개의 dummy2 토큰을 Liquidity 컨트랙트에 유동성 공급한다.
+      await liquidity.addLiquidity(web3.utils.toWei('10', 'ether'), web3.utils.toWei('20', 'ether'));
+      // Liquidity 컨트랙트의 잔고는 2이더가 있어야한다.
+      let totalSupply = await liquidity.totalSupply();
+      console.log('total supply', web3.utils.toBN(totalSupply).toString())
+      expect(web3.utils.toBN(totalSupply).toString()).to.equal(
+        web3.utils.toWei('20', 'ether')
       );
-      // Exchange 컨트랙트의 WEMEX토큰 잔고는 80개에서 5개를 사용자에게 줘서 75개가 남는다.
-      var balance = await token.balanceOf(liquidity.address);
+
+      //  Liquidity 컨트랙트에 들어간 토큰 개수는 10개여야한다.
+      var balance = await dum1.balanceOf(liquidity.address);
       console.log('balance', web3.utils.toBN(balance).toString());
       expect(web3.utils.toBN(balance).toString()).to.equal(
-        web3.utils.toWei('75', 'ether')
+        web3.utils.toWei('10', 'ether')
+      );
+      //  Liquidity 컨트랙트에 들어간 토큰 개수는 20개여야한다.
+      var balance = await dum2.balanceOf(liquidity.address);
+      console.log('balance', web3.utils.toBN(balance).toString());
+      expect(web3.utils.toBN(balance).toString()).to.equal(
+        web3.utils.toWei('20', 'ether')
+      );    
+    });
+  });
+
+  describe('유동성 공급 (유동성 있을 때)', async () => {
+    it('유동성 공급한다.', async () => {
+      // liquidity 컨트랙트에게 10개의 WEMEX토큰을 사용할 수 있도록 승인
+      await dum1.approve(liquidity.address, web3.utils.toWei('20', 'ether'));
+      await dum2.approve(liquidity.address, web3.utils.toWei('20', 'ether'));
+      // token.transferFrom(msg.sender, address(this), _amount);
+
+      // 유동성 공급자는 20개의 dummy1 토큰과 20개의 dummy2 토큰을 Liquidity 컨트랙트에 유동성 공급사도한다.
+      await liquidity.addLiquidity(web3.utils.toWei('20', 'ether'), web3.utils.toWei('20', 'ether'));
+      
+      // 현재 풀에 1:2의 비유로 토큰이 들어있으므로 20 / 20의 토큰을 입력 시도하면 10 / 20만 입력되고 유동성은 20이 공급되어야 한다.
+
+
+      let totalSupply = await liquidity.totalSupply();
+      console.log('total supply', web3.utils.toBN(totalSupply).toString())
+      expect(web3.utils.toBN(totalSupply).toString()).to.equal(
+        web3.utils.toWei('40', 'ether')
+      );
+
+      //  Liquidity 컨트랙트에 들어간 토큰 개수는 10개여야한다.
+      var balance = await dum1.balanceOf(liquidity.address);
+      console.log('balance', web3.utils.toBN(balance).toString());
+      expect(web3.utils.toBN(balance).toString()).to.equal(
+        web3.utils.toWei('20', 'ether')
+      );
+      //  Liquidity 컨트랙트에 들어간 토큰 개수는 20개여야한다.
+      var balance = await dum2.balanceOf(liquidity.address);
+      console.log('balance', web3.utils.toBN(balance).toString());
+      expect(web3.utils.toBN(balance).toString()).to.equal(
+        web3.utils.toWei('40', 'ether')
+      );    
+    });
+  });
+
+  describe('스왑 ', async () => {
+    it('사용자가 토근 주소와 입력 토큰 양을 입력하면 교환해준다.', async () => {
+      // liquidity 컨트랙트에게 10개의 dummy2토큰을 사용할 수 있도록 승인
+      await dum2.approve(liquidity.address, web3.utils.toWei('10', 'ether'));
+      await liquidity.swap(dum2.address, web3.utils.toWei('10', 'ether'));
+
+      //  uint256 numerator = _liquidityOutput * _inputAmount;
+      //  uint256 denominator = _liquidityInput + _inputAmount;
+      // 20 * 10
+      // 40 + 10
+      // ratio = 4
+
+      console.log(liquidity.address)
+      let balance = await dum1.balanceOf(liquidity.adddress);
+      expect(web3.utils.toBN(balance).toString()).to.equal(
+        web3.utils.toWei('16', 'ether')
+      );
+     
+      balance = await dum2.balanceOf(liquidity.address);
+      console.log('balance', web3.utils.toBN(balance).toString());
+      expect(web3.utils.toBN(balance).toString()).to.equal(
+        web3.utils.toWei('50', 'ether')
       );
     });
   });
@@ -201,7 +235,7 @@ contract('Liquidity', (accounts) => {
       );
     });
   });
-  describe('swap token to coin', async () => {
+  describe.skip('swap token to coin', async () => {
     it('사용자는 토큰을 넣고 CPMM 알고리즘에 의해 위믹스 코인을 받을 수 있다.', async () => {
       await token.transfer(accounts[1], toWei('5000', 'ether'));
       let sender = await token.balanceOf(accounts[1]);
