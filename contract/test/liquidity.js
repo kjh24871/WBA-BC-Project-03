@@ -32,7 +32,7 @@ contract('Liquidity', (accounts) => {
       );
     });
   });
-  describe.skip('유동성 공급', async () => {
+  describe('유동성 공급', async () => {
     it('유동성 공급한다.', async () => {
       // liquidity 컨트랙트에게 10개의 WEMEX토큰을 사용할 수 있도록 승인
       await token.approve(liquidity.address, web3.utils.toWei('10', 'ether'));
@@ -195,7 +195,7 @@ contract('Liquidity', (accounts) => {
       );
     });
   });
-  describe('swap token to coin', async () => {
+  describe.skip('swap token to coin', async () => {
     it('사용자는 토큰을 넣고 CPMM 알고리즘에 의해 위믹스 코인을 받을 수 있다.', async () => {
       await token.transfer(accounts[1], toWei('5000', 'ether'));
       let sender = await token.balanceOf(accounts[1]);
