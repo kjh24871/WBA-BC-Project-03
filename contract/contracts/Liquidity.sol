@@ -7,6 +7,8 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract Liquidity is ERC20{
   IERC20 tokenA;
   IERC20 tokenB;
+  uint256 fee = 0;
+  address payable[] delegators;
 
   event Swap(address caller, address input, address output, uint256 inputAmount, uint256 outputAmount);
   event AddLiquidity(address caller, uint256 amount);
@@ -36,6 +38,9 @@ contract Liquidity is ERC20{
     tokenA.transferFrom(msg.sender, address(this), actualAmountA);
     tokenB.transferFrom(msg.sender, address(this), actualAmountB);
     _mint(msg.sender, actualAmountB);
+    if (!isExists(msg.sender)){
+      delegators.push(payable(msg.sender));
+    }
     emit AddLiquidity(msg.sender, actualAmountB);
     return (actualAmountA, actualAmountB);
   }
@@ -46,7 +51,7 @@ contract Liquidity is ERC20{
     uint256 totalSupply = totalSupply();
     outputA = tokenA.balanceOf(address(this)) * _amount / totalSupply;
     outputB = tokenB.balanceOf(address(this)) * _amount / totalSupply;
-    
+  
     tokenA.transfer(msg.sender, outputA);
     tokenB.transfer(msg.sender, outputB);
     _burn(msg.sender, _amount);
@@ -54,7 +59,8 @@ contract Liquidity is ERC20{
     return (outputA, outputB);
   }
   
-  function swap(address _inputToken, uint256 _inputAmount) public returns(uint256 outputAmount){
+  function swap(address _inputToken, uint256 _inputAmount) public payable returns(uint256 outputAmount){
+    require(msg.value >= fee, "not enough fee");
     IERC20 inputToken = IERC20(_inputToken);
     IERC20 outputToken = (tokenA == inputToken) ? tokenB : tokenA;
     outputAmount = getSwapRatio(_inputAmount, inputToken.balanceOf(address(this)), outputToken.balanceOf(address(this)));
@@ -63,12 +69,34 @@ contract Liquidity is ERC20{
     outputToken.transfer(msg.sender, outputAmount);
     emit Swap(msg.sender, address(inputToken), address(outputToken), _inputAmount, outputAmount);
     return outputAmount;
-}
+  }
+
+  function pullReward() public{
+    uint256 amount;
+    uint256 totalSupply = totalSupply();
+    for(uint256 i = 0 ; i < delegators.length ; i++){
+      amount = address(this).balance * balanceOf(delegators[i]) / totalSupply;
+      delegators[i].transfer(amount);
+    }
+  }
 
   function getSwapRatio(uint256 _inputAmount, uint256 _liquidityInput, uint256 _liquidityOutput)
    public pure returns(uint256){
     uint256 numerator = _liquidityOutput * _inputAmount;
     uint256 denominator = _liquidityInput + _inputAmount;
     return numerator/denominator;
+  }
+
+  function getTotalFee() public view returns(uint256){
+    return address(this).balance;
+  }
+
+  function isExists(address user) private view returns (bool) {
+    for (uint i = 0; i < delegators.length; i++) {
+        if (delegators[i] == user) {
+            return true;
+        }
+    }
+    return false;
   }
 }
