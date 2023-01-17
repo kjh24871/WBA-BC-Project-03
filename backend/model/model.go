@@ -32,9 +32,9 @@ func NewModel() (*Model, error) {
 	if err != nil {
 		fmt.Println("client error")
 	}
-	r.tokenAddress = common.HexToAddress("0x5EB03830c5335589cf58793caEE99921B5735cda")
+	r.tokenAddress = common.HexToAddress("0xBD68E928E6C317d31AC07666c2fA593189a3d56D")
 	r.ownerAddress = common.HexToAddress("0x15A67B0bB392b2978bFeDBC67809A562d7045767")
-	r.liquidityAddress = common.HexToAddress("0x595b154e719feB07165A574b51FDC7717E6F9129")
+	r.liquidityAddress = common.HexToAddress("0x23C9086CE4F16Accb923d4115587a084cb5Bb1D3")
 	return r, err
 }
 
