@@ -8,12 +8,9 @@ contract Liquidity is ERC20{
   IERC20 tokenA;
   IERC20 tokenB;
 
-  /**
-    실제 가격 비율: 1:20
-    풀 기준 가격 : amountB:amountA
-  */
   event Swap(address caller, address input, address output, uint256 inputAmount, uint256 outputAmount);
   event AddLiquidity(address caller, uint256 amount);
+  event RemoveLiquidity(address caller, uint256 amount);
   constructor (address _tokenA, address _tokenB) ERC20("lpToken", "LP"){
     tokenA = IERC20(_tokenA);
     tokenB = IERC20(_tokenB);
@@ -35,9 +32,10 @@ contract Liquidity is ERC20{
         actualAmountB = _desiredAmountA * amountB / amountA;
         actualAmountA = _desiredAmountA;
       }
-      
     }
+    tokenA.approve(address(this), actualAmountA);
     tokenA.transferFrom(msg.sender, address(this), actualAmountA);
+    tokenB.approve(address(this), actualAmountB);
     tokenB.transferFrom(msg.sender, address(this), actualAmountB);
     _mint(msg.sender, actualAmountB);
     emit AddLiquidity(msg.sender, actualAmountB);
@@ -54,6 +52,7 @@ contract Liquidity is ERC20{
     tokenA.transferFrom(address(this), msg.sender, outputA);
     tokenB.transferFrom(address(this), msg.sender, outputB);
     _burn(msg.sender, _amount);
+    emit RemoveLiquidity(msg.sender, _amount);
     return (outputA, outputB);
   }
   
