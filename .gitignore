@@ -2,7 +2,7 @@ package-lock.json
 gitkeep
 node_modules
 build
-
+config.toml
 # Created by https://www.toptal.com/developers/gitignore/api/macos,go,solidity
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,go,solidity
 
