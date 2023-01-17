@@ -268,11 +268,14 @@ contract('Liquidity', (accounts) => {
       );
 
       console.log('슬리피지 적용 시 : ', toBN(tempRatio).toString());
-      // console.log(accounts[1]);
+      console.log(accounts[1]);
       sender = await token.balanceOf(accounts[1]);
-      console.log('accounts[1]: ', toBN(sender).toString());
+
+      await token.approve(liquidity.address, toWei('1000', 'ether'), {
+        from: accounts[1],
+      });
       await liquidity.swapTokenToCoin(
-        toWei('10', 'ether'),
+        toWei('2', 'ether'),
         toWei('1', 'ether'),
         { from: accounts[1] }
       );
