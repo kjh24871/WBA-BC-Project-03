@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"math/big"
 
-	contracts "final/backend/contract2"
+	contracts "final/backend/contract3"
+	tokenContracts "final/backend/contract"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -18,6 +19,7 @@ import (
 	// "github.com/ethereum/go-ethereum/rlp"
 	// "golang.org/x/crypto/sha3"
 )
+
 func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
 	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
 	if err != nil {
@@ -37,20 +39,22 @@ func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
 	}
 	tx, err := contracts.Swap(transactorOpts, tokenAddress, inputAmount)
 	if err != nil {
-		panic(eff)
+		panic(err)
 	}
 
 	fmt.Println("Transaction sent:", tx.Hash().Hex())
 	return tx.Hash().Hex()
 }
 
-func (p *Model)AddLiquidity(amount int64) string {
+func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64 ) string {
 	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
+	token1Contracts, err := tokenContracts.NewContracts(p.tokenAddress, p.client)
+	token2Contracts, err := tokenContracts.NewContracts(p.token2Address, p.client)
 	if err != nil {
 		panic(err)
 	}
-	maxToken := big.NewInt(amount * 1000000000000000000)
-
+	inputAmountA := big.NewInt(_desiredAmountA)
+	inputAmountB := big.NewInt(_desiredAmountB)
 	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
 	if err != nil {
 		fmt.Println(err)
@@ -60,8 +64,16 @@ func (p *Model)AddLiquidity(amount int64) string {
 	if err != nil {
 		panic(err)
 	}
-
-	tx, err := contracts.AddLiquidity(transactorOpts, maxToken)
+	// TODO : Approve 2 토큰하기
+	tx, err := token1Contracts.Approve(transactorOpts, p.liquidityAddress, inputAmountA)
+	if err != nil {
+		panic(err)
+	}
+	tx, err = token2Contracts.Approve(transactorOpts, p.liquidityAddress, inputAmountB)
+	if err != nil {
+		panic(err)
+	}
+	tx, err = contracts.AddLiquidity(transactorOpts, inputAmountA, inputAmountB)
 	if err != nil {
 		panic(err)
 	}
@@ -82,11 +94,24 @@ func (p *Model)BalanceOf(strAddress string) *big.Int{
 	return balance
 }
 
-// func (p *Model) Approve(strAddress string, amount int64) {
-// 	instance, err := contracts.NewContracts(p.liquidityAddress, p.client)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	address := common.HexToAddress(strAddress)
-// 	instance.Appro 
-// }
+func (p *Model) RemoveLiquidity(lpAmount int64) string{
+	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
+	inputAmount := big.NewInt(lpAmount)
+
+	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
+	if err != nil {
+		fmt.Println(err)
+	}
+	
+	transactorOpts,err := bind.NewKeyedTransactorWithChainID(privateKey,big.NewInt(1112))
+	if err != nil {
+		panic(err)
+	}
+
+	tx, err := contracts.RemoveLiquidity(transactorOpts, inputAmount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Transaction sent:", tx.Hash().Hex())
+	return tx.Hash().Hex()
+}
