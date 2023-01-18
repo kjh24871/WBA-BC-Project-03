@@ -12,14 +12,6 @@ contract LiquidityFactory{
 	mapping (string => address) poolAddress;
 	string[] poolName;
 
-	//정보 반환횽 구조체
-	struct info{
-		address poolAddress;
-		string poolName;
-		uint256 totalLiquidity;
-		uint256 amountTokenA;
-		uint256 amountTokenB;
-	}
 	constructor(){
 		owner = msg.sender;
 	}
@@ -47,18 +39,10 @@ contract LiquidityFactory{
 	}
 
 	// pool 목록 반환
-	function getLiquidityList() public view returns (info[] memory){
-		info[] memory list;
-		for (uint i = 0 ; i < poolName.length; i++){
-			(uint256 liquidity, uint256 amountTokenA, uint256 amountTokenB) = contracts[poolAddress[poolName[i]]].getLiquidity();
-			list[i] = info(
-				poolAddress[poolName[i]],
-				poolName[i],
-				liquidity,
-				amountTokenA,
-				amountTokenB
-				);
-		}
-		return list;
+	function getLiquidityList() public view returns (string[] memory){		
+		return poolName;
+	}
+	function getAddressWithName(string memory name) public view returns (address){
+		return poolAddress[name];
 	}
 }
