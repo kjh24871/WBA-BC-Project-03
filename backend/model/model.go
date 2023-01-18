@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
-	contracts "final/backend/contract"
+	contracts "final/backend/model/wemex/liquidity"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"

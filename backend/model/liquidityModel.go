@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"math/big"
 
-	contracts "final/backend/contract3"
-	tokenContracts "final/backend/contract"
+	contracts "final/backend/model/wemex/liquidity"
+	tokenContracts "final/backend/model/wemex/liquidityFactory"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -21,7 +21,7 @@ import (
 )
 
 func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
-	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
+	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
 	if err != nil {
 		panic(err)
 	}
@@ -47,9 +47,9 @@ func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
 }
 
 func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64 ) string {
-	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
-	token1Contracts, err := tokenContracts.NewContracts(p.tokenAddress, p.client)
-	token2Contracts, err := tokenContracts.NewContracts(p.token2Address, p.client)
+	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
+	token1Contracts, err := tokenContracts.NewLiquidity(p.tokenAddress, p.client)
+	token2Contracts, err := tokenContracts.NewLiquidity(p.token2Address, p.client)
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +82,7 @@ func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64 ) strin
 }
 
 func (p *Model)BalanceOf(strAddress string) *big.Int{
-	instance, err := contracts.NewContracts(p.liquidityAddress, p.client)
+	instance, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
 	if err != nil {
 		panic(err)
 	}
@@ -95,7 +95,7 @@ func (p *Model)BalanceOf(strAddress string) *big.Int{
 }
 
 func (p *Model) RemoveLiquidity(lpAmount int64) string{
-	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
+	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
 	inputAmount := big.NewInt(lpAmount)
 
 	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
