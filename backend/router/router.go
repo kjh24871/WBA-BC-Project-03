@@ -59,8 +59,9 @@ func (p *Router) Idx() *gin.Engine {
 		{
 			pool.PUT("", p.ct.AddLiquidity)
 			// pool.DELETE("", p.ct.RemoveLiquidity)
+			pool.GET("balance", p.ct.BalanceOf)
 		}
-		// dex.POST("/swap", p.ct.Swap)
+		dex.POST("/swap", p.ct.Swap)
 
 		//관리자
 		dex.POST("", p.ct.CreateLiquidity) // 1. 새로운 풀 생성
