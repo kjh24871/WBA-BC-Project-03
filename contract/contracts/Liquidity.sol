@@ -110,5 +110,8 @@ contract Liquidity is ERC20{
     amountB = tokenB.balanceOf(address(this));
     return (liquidity, amountA, amountB);
   }
-}
 
+  function getTokenAddress() public view returns (address, address){
+    return (address(tokenA), address(tokenB));
+  }
+}
