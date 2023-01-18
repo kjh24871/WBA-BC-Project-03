@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
-	contracts "final/backend/model/wemex/liquidity"
+	contracts "final/backend/model/wemex/ERC20"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -186,7 +186,7 @@ func (p *Model) ContractCreateTransferTx(pk string, dstAddress string, amount in
 }
 
 func (p *Model) GetSymbolByToken(token string) string {
-	instance, err := contracts.NewContracts(p.tokenAddress, p.client)
+	instance, err := contracts.NewERC20(p.tokenAddress, p.client)
 	if err != nil {
 		panic(err)
 	}
@@ -205,7 +205,7 @@ func (p *Model) GetSymbolByToken(token string) string {
 }
 
 func (p *Model) GetTokenWithAddress(address string) *big.Int {
-	instance, err := contracts.NewContracts(p.tokenAddress, p.client)
+	instance, err := contracts.NewERC20(p.tokenAddress, p.client)
 	if err != nil {
 		panic(err)
 	}

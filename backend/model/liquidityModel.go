@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	contracts "final/backend/model/wemex/liquidity"
-	tokenContracts "final/backend/model/wemex/liquidityFactory"
+	tokenContracts "final/backend/model/wemex/ERC20"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -48,8 +48,8 @@ func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
 
 func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64 ) string {
 	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
-	token1Contracts, err := tokenContracts.NewLiquidity(p.tokenAddress, p.client)
-	token2Contracts, err := tokenContracts.NewLiquidity(p.token2Address, p.client)
+	token1Contracts, err := tokenContracts.NewERC20(p.tokenAddress, p.client)
+	token2Contracts, err := tokenContracts.NewERC20(p.token2Address, p.client)
 	if err != nil {
 		panic(err)
 	}
