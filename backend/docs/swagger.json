@@ -1,0 +1,235 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/all": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "call GetLiquidityList, return ok by json.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "private key",
+                        "name": "pk",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Controller"
+                        }
+                    }
+                }
+            }
+        },
+        "/pool": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "call AddLiquidity, return ok by json.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "private key",
+                        "name": "pk",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Token address and amount",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.AddLiquidityInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Controller"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "call CreateLiquidity, return ok by json.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "private key",
+                        "name": "pk",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Token address",
+                        "name": "address",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CreateLiquidityInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Controller"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "call RemoveLiquidity, return ok by json.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "private key",
+                        "name": "pk",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Token address and amount",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.RemoveLiquidityInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Controller"
+                        }
+                    }
+                }
+            }
+        },
+        "/swap": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "call Swap, return ok by json.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "private key",
+                        "name": "pk",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Token symbol and amount",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.SwapInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Controller"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.AddLiquidityInput": {
+            "type": "object",
+            "properties": {
+                "address_a": {
+                    "type": "string"
+                },
+                "address_b": {
+                    "type": "string"
+                },
+                "amount_a": {
+                    "type": "string"
+                },
+                "amount_b": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.Controller": {
+            "type": "object"
+        },
+        "controller.CreateLiquidityInput": {
+            "type": "object",
+            "properties": {
+                "token1": {
+                    "type": "string"
+                },
+                "token2": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.RemoveLiquidityInput": {
+            "type": "object",
+            "properties": {
+                "amount_a": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.SwapInput": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "input": {
+                    "type": "string"
+                },
+                "output": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

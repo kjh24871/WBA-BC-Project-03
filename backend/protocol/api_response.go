@@ -2,7 +2,7 @@ package protocol
 
 import (
 	"fmt"
-	"lecture/WBABEProject-23/logger"
+	"lecture/WBA-BC-Project-03/backend/logger"
 
 	"github.com/gin-gonic/gin"
 )

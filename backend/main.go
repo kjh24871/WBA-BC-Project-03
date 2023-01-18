@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	ctl "final/backend/controller"
-	"final/backend/model"
-	rt "final/backend/router"
 	"fmt"
+	ctl "lecture/WBA-BC-Project-03/backend/controller"
+	"lecture/WBA-BC-Project-03/backend/model"
+	rt "lecture/WBA-BC-Project-03/backend/router"
 	"log"
 	"net/http"
 	"os"
