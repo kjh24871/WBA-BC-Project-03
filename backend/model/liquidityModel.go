@@ -20,7 +20,7 @@ import (
 	// "golang.org/x/crypto/sha3"
 )
 
-func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
+func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64, pk string ) string {
 	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
 	if err != nil {
 		panic(err)
@@ -28,7 +28,7 @@ func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
 	tokenAddress := common.HexToAddress(inputTokenAddress)
 	inputAmount := big.NewInt(amount)
 
-	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
+	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +46,7 @@ func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
 	return tx.Hash().Hex()
 }
 
-func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64 ) string {
+func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64, pk string ) string {
 	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
 	token1Contracts, err := tokenContracts.NewERC20(p.tokenAddress, p.client)
 	token2Contracts, err := tokenContracts.NewERC20(p.token2Address, p.client)
@@ -55,7 +55,7 @@ func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64 ) strin
 	}
 	inputAmountA := big.NewInt(_desiredAmountA)
 	inputAmountB := big.NewInt(_desiredAmountB)
-	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
+	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -94,11 +94,11 @@ func (p *Model)BalanceOf(strAddress string) *big.Int{
 	return balance
 }
 
-func (p *Model) RemoveLiquidity(lpAmount int64) string{
+func (p *Model) RemoveLiquidity(lpAmount int64, pk string) string{
 	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
 	inputAmount := big.NewInt(lpAmount)
 
-	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
+	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
 		fmt.Println(err)
 	}
