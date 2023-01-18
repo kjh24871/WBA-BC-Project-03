@@ -16,6 +16,15 @@ func NewCTL(rep *model.Model) (*Controller, error) {
 	return r, nil
 }
 
+// GetAllPools godoc
+// @Summary call GetAllPools, return ok by json.
+// @새로운 사용자 추가.
+// @name GetAllPools
+// @Accept  json
+// @Produce  json
+// @Param id body model.Person true "User input"
+// @Router /acc/signup [POST]
+// @Success 200 {object} Controller
 func (p *Controller) GetAllPools(c *gin.Context) {
 
 }
@@ -32,7 +41,7 @@ func (p *Controller) BalanceOf(c *gin.Context) {
 	address := c.Query("address")
 	// c.JSON(200, p.md.BalanceOf(address)) ==
 	// protocl.Success(200).Response(c)
-	c.JSON(200,p.md.BalanceOf(address))
+	c.JSON(200, p.md.BalanceOf(address))
 }
 
 func (p *Controller) AddLiquidity(c *gin.Context) {
