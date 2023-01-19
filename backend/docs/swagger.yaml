@@ -42,12 +42,6 @@ paths:
     get:
       consumes:
       - application/json
-      parameters:
-      - description: private key
-        in: header
-        name: pk
-        required: true
-        type: string
       produces:
       - application/json
       responses:

@@ -15,36 +15,39 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rlp"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/sha3"
 )
 
 type Model struct {
-	// mongoClient              *mongo.Client
-	// colBlock                 *mongo.Collection
+	mongoClient              *mongo.Client
+	colPool                  *mongo.Collection
 	client                   *ethclient.Client
 	tokenAddress             common.Address //컨트랙트 어드레스
 	liquidityFactoryAddresss common.Address
 }
 
-func NewModel() (*Model, error) {
+func NewModel(mgUrl string) (*Model, error) {
 	r := &Model{}
 	var err error
 
-	// if r.mongoClient, err = mongo.Connect(context.Background(), options.Client().ApplyURI(mgUrl)); err != nil {
-	// 	return nil, err
-	// } else if err := r.mongoClient.Ping(context.Background(), nil); err != nil {
-	// 	return nil, err
-	// } else {
-	// 	db := r.mongoClient.Database("daemon")
-	// 	r.colBlock = db.Collection("block")
-	// }
+	if r.mongoClient, err = mongo.Connect(context.Background(), options.Client().ApplyURI(mgUrl)); err != nil {
+		return nil, err
+	} else if err := r.mongoClient.Ping(context.Background(), nil); err != nil {
+		return nil, err
+	} else {
+		db := r.mongoClient.Database("daemon")
+		r.colPool = db.Collection("pool")
+	}
 
 	r.client, err = ethclient.Dial("https://api.test.wemix.com")
 	if err != nil {
 		fmt.Println("client error")
 	}
 
-	r.liquidityFactoryAddresss = common.HexToAddress("0x676236373807370D0d145900876AA19B3D1968fB")
+	r.liquidityFactoryAddresss = common.HexToAddress("0x8fe4789d228d58247E3AB33Bb475d8FF7E37D351")
 	return r, err
 }
 
@@ -245,3 +248,10 @@ func (p *Model) TransferTokenWithPK(address string, pk string, value int64) stri
 // 	result := p.colBlock.FindOne(context.TODO(), filter)
 // 	if
 // }
+
+func (p *Model) UpsertAddress(address string) {
+	filter := bson.M{"address": address}
+	update := bson.M{"$set": bson.M{"address": address}}
+	option := options.Update().SetUpsert(true)
+	p.colPool.UpdateOne(context.TODO(), filter, update, option)
+}

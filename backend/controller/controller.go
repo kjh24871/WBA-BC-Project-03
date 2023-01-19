@@ -24,7 +24,6 @@ func NewCTL(rep *model.Model) (*Controller, error) {
 // @name GetLiquidityList
 // @Accept  json
 // @Produce  json
-// @Param pk header string true "private key"
 // @Router /all [GET]
 // @Success 200 {object} Controller
 func (p *Controller) GetLiquidityList(c *gin.Context) {
@@ -89,7 +88,7 @@ func (p *Controller) AddLiquidity(c *gin.Context) {
 	c.BindJSON(&input)
 	intAmountA, _ := strconv.ParseInt(input.AmountA, 10, 64)
 	intAmountB, _ := strconv.ParseInt(input.AmountB, 10, 64)
-	c.JSON(200, p.md.AddLiquidity(intAmountA, intAmountB, pk, input.SymA, input.SymB))
+	p.md.AddLiquidity(intAmountA, intAmountB, pk, input.SymA, input.SymB).Response(c)
 }
 
 type AddLiquidityInput struct {

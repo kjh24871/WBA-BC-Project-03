@@ -22,7 +22,7 @@ var (
 
 func main() {
 	//model 모듈 선언
-	if mod, err := model.NewModel(); err != nil {
+	if mod, err := model.NewModel("mongodb://127.0.0.1:27017"); err != nil {
 		panic(err)
 	} else if controller, err := ctl.NewCTL(mod); err != nil { //controller 모듈 설정
 		panic(err)

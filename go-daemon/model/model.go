@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"log"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Model struct {
-	client   *mongo.Client
-	colBlock *mongo.Collection
+	client      *mongo.Client
+	colBlock    *mongo.Collection
+	colContract *mongo.Collection
 }
 
 type Block struct {
@@ -36,6 +38,10 @@ type Transaction struct {
 	BlockNumber uint64 `bson:"blockNumber"`
 }
 
+type Pool struct {
+	PoolAddress string `bson:"address"`
+}
+
 func NewModel(mgUrl string) (*Model, error) {
 	r := &Model{}
 
@@ -47,8 +53,21 @@ func NewModel(mgUrl string) (*Model, error) {
 	} else {
 		db := r.client.Database("daemon")
 		r.colBlock = db.Collection("block")
+		r.colContract = db.Collection("pool")
 	}
 	return r, nil
+}
+
+func (p *Model) CheckPool() []Pool {
+	cursor, err := p.colContract.Find(context.TODO(), bson.D{})
+	if err != nil {
+		panic(err)
+	}
+	var pools []Pool
+	if err = cursor.All(context.TODO(), &pools); err != nil {
+		panic(err)
+	}
+	return pools
 }
 
 func (p *Model) SaveBlock(block *Block) error {
