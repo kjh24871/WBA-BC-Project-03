@@ -1,3 +1,4 @@
+<a href="https://stakingcrypto.info/ko/coins/wemix/logo"><img src="https://stakingcrypto.info/static/assets/coins/wemix-logo.png" width="100" height="100" title="WEMIX logo" alt="WEMIX logo"></a>
 # Blockchain-Project-WEMEX
 ## 프로젝트 소개
 'WEMEX'는 WEMIX + DEX를 조합한 WEMIX 네트워크에서 사용되는 토큰들의 스왑 및 DeFi를 위한 DEX 프로젝트입니다.
