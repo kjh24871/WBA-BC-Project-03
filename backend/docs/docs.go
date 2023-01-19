@@ -25,15 +25,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "call GetLiquidityList, return ok by json.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "private key",
-                        "name": "pk",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
