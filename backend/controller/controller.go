@@ -46,10 +46,10 @@ func (p *Controller) GetMyPools(c *gin.Context) {
 // @Router /pool [POST]
 // @Success 200 {object} Controller
 func (p *Controller) CreateLiquidity(c *gin.Context) {
-	pk := c.GetHeader("privateKey")
-	var input AddLiquidityInput
+	pk := c.GetHeader("pk")
+	var input CreateLiquidityInput
 	c.BindJSON(&input)
-	p.md.NewLiquidityPool(input.AddressA, input.AddressB, pk)
+	p.md.NewLiquidityPool(input.Token1, input.Token2, pk).Response(c)
 }
 
 type CreateLiquidityInput struct {
@@ -57,12 +57,20 @@ type CreateLiquidityInput struct {
 	Token2 string `json:"token2"`
 }
 
+// BalanceOf godoc
+// @Summary call BalanceOf, return ok by json.
+// @풀 지분 확인
+// @name BalanceOf
+// @Accept  json
+// @Produce  json
+// @Param name query string true "pool name"
+// @Param address query string true "my address"
+// @Router /pool/balance [GET]
+// @Success 200 {object} Controller
 func (p *Controller) BalanceOf(c *gin.Context) {
-
+	name := c.Query("name")
 	address := c.Query("address")
-	// c.JSON(200, p.md.BalanceOf(address)) ==
-	// protocl.Success(200).Response(c)
-	c.JSON(200, p.md.BalanceOf(address))
+	p.md.BalanceOf(name, address).Response(c)
 }
 
 // AddLiquidity godoc
@@ -76,19 +84,19 @@ func (p *Controller) BalanceOf(c *gin.Context) {
 // @Router /pool [PUT]
 // @Success 200 {object} Controller
 func (p *Controller) AddLiquidity(c *gin.Context) {
-	pk := c.GetHeader("privateKey")
+	pk := c.GetHeader("pk")
 	var input AddLiquidityInput
 	c.BindJSON(&input)
 	intAmountA, _ := strconv.ParseInt(input.AmountA, 10, 64)
 	intAmountB, _ := strconv.ParseInt(input.AmountB, 10, 64)
-	c.JSON(200, p.md.AddLiquidity(intAmountA, intAmountB, pk, input.AddressA, input.AddressB))
+	c.JSON(200, p.md.AddLiquidity(intAmountA, intAmountB, pk, input.SymA, input.SymB))
 }
 
 type AddLiquidityInput struct {
-	AmountA  string `json:"amount_a"`
-	AmountB  string `json:"amount_b"`
-	AddressA string `json:"address_a"`
-	AddressB string `json:"address_b"`
+	AmountA string `json:"amount_a"`
+	AmountB string `json:"amount_b"`
+	SymA    string `json:"sym_a"`
+	SymB    string `json:"sym_b"`
 }
 
 // RemoveLiquidity godoc
@@ -103,7 +111,7 @@ type AddLiquidityInput struct {
 // @Success 200 {object} Controller
 func (p *Controller) RemoveLiquidity(c *gin.Context) {
 	var input RemoveLiquidityInput
-	pk := c.GetHeader("privateKey")
+	pk := c.GetHeader("pk")
 	c.BindJSON(&input)
 	intAmount, _ := strconv.ParseInt(input.Amount, 10, 64)
 	p.md.RemoveLiquidity(intAmount, pk).Response(c)
@@ -133,7 +141,7 @@ func (p *Controller) Swap(c *gin.Context) {
 			protocol.Fail(nil, 500)
 		}
 	}
-	pk := c.GetHeader("privateKey")
+	pk := c.GetHeader("pk")
 	intAmount, _ := strconv.ParseInt(input.Amount, 10, 64)
 	p.md.SwapLiquidity(address, input.Input, intAmount, pk).Response(c)
 }
@@ -150,7 +158,7 @@ type SwapInput struct {
 // }
 
 // func (p *Controller) CheckTx(c *gin.Context) {
-// 	pk := c.GetHeader("privateKey")
+// 	pk := c.GetHeader("pk")
 // 	tx := c.Query("tx")
 
 // }

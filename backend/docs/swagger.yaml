@@ -1,13 +1,13 @@
 definitions:
   controller.AddLiquidityInput:
     properties:
-      address_a:
-        type: string
-      address_b:
-        type: string
       amount_a:
         type: string
       amount_b:
+        type: string
+      sym_a:
+        type: string
+      sym_b:
         type: string
     type: object
   controller.Controller:
@@ -124,6 +124,29 @@ paths:
           schema:
             $ref: '#/definitions/controller.Controller'
       summary: call AddLiquidity, return ok by json.
+  /pool/balance:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: pool name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: my address
+        in: query
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Controller'
+      summary: call BalanceOf, return ok by json.
   /swap:
     post:
       consumes:

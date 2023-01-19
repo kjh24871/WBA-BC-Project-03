@@ -151,6 +151,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/pool/balance": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "call BalanceOf, return ok by json.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "pool name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "my address",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Controller"
+                        }
+                    }
+                }
+            }
+        },
         "/swap": {
             "post": {
                 "consumes": [
@@ -193,16 +228,16 @@ const docTemplate = `{
         "controller.AddLiquidityInput": {
             "type": "object",
             "properties": {
-                "address_a": {
-                    "type": "string"
-                },
-                "address_b": {
-                    "type": "string"
-                },
                 "amount_a": {
                     "type": "string"
                 },
                 "amount_b": {
+                    "type": "string"
+                },
+                "sym_a": {
+                    "type": "string"
+                },
+                "sym_b": {
                     "type": "string"
                 }
             }
