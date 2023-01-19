@@ -8,7 +8,7 @@ WEMIX에는 다양한 게임들이 있습니다. 그중 저희는 P2E(Play to Ea
 
 ## 목차
   - [설치 방법](#설치-방법)
-  - [개발 스택](#개발-스택)
+  - [개발 스택](#개발-스택-통합)
   - [구현 목록](#구현-목록)
   - [결과물](#결과물)
   - [라이센스](#라이센스)
@@ -18,7 +18,18 @@ WEMIX에는 다양한 게임들이 있습니다. 그중 저희는 P2E(Play to Ea
   go mod tidy
 ```
 ## 개발 스택 (통합)
-<img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=black"> <img src="https://img.shields.io/badge/Solidity-363636?style=for-the-badge&logo=solidity&logoColor=white"> <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white">
+
+[Collaboration Tool]
+
+<img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white"> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white"> <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white"> <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white">
+
+[Blockchain]
+
+<img src="https://img.shields.io/badge/Solidity-363636?style=for-the-badge&logo=solidity&logoColor=white"> <img src="https://img.shields.io/badge/Truffle-5E464D?style=for-the-badge&logo=truffle&logoColor=white"> <img src="https://img.shields.io/badge/Ganache-E4A663?style=for-the-badge&logo=ganache&logoColor=white"> 
+
+[Daemon]
+<img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=black">
+<img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white">
 
 
 
