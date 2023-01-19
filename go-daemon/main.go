@@ -16,7 +16,7 @@ import (
 
 func main() {
 	// config 초기화
-	cf := conf.GetConfig("../config.toml")
+	cf := conf.GetConfig("./config/config.toml")
 
 	// model 초기화
 	md, err := model.NewModel(cf.DB.Host)
@@ -34,9 +34,14 @@ func main() {
 	MaxRetries := 5
 	dialRetries := MaxRetries
 	logs := make(chan types.Log)
-	contractAddress := common.HexToAddress("0x676236373807370D0d145900876AA19B3D1968fB")
+	contractAddress := common.HexToAddress("0x8fe4789d228d58247E3AB33Bb475d8FF7E37D351")
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
+	}
+	deleteDuplicatePool := DeleteDuplicateItem(md.CheckPool())
+	for _, value := range deleteDuplicatePool {
+		poolAddress := common.HexToAddress(value)
+		query.Addresses = append(query.Addresses, poolAddress)
 	}
 	sub, err := client.SubscribeFilterLogs(context.Background(), query, logs)
 	if err != nil {
@@ -110,6 +115,25 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+			deleteDuplicatePool = DeleteDuplicateItem(md.CheckPool())
+			for _, value := range deleteDuplicatePool {
+				poolAddress := common.HexToAddress(value)
+				query.Addresses = append(query.Addresses, poolAddress)
+			}
 		}
 	}
+}
+
+func DeleteDuplicateItem(arr []model.Pool) []string {
+	ret := []string{}
+	m := make(map[string]struct{})
+
+	for _, val := range arr {
+		if _, ok := m[val.PoolAddress]; !ok {
+			m[val.PoolAddress] = struct{}{}
+			ret = append(ret, val.PoolAddress)
+		}
+	}
+
+	return ret
 }

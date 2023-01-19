@@ -88,14 +88,15 @@ func (p *Model) AddLiquidity(_desiredAmountA int64, _desiredAmountB int64, pk st
 
 	//  심볼 2개 합쳐서 pool 이름 구하기 -> pool 이름을 주소 구하기 -> 두개 token Address도 나온다
 	// 심볼1-심볼2
-	poolContracts, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
+	factory, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
 	if err != nil {
 		return protocol.Fail(err, 500)
 	}
-	poolAddress, err := poolContracts.GetAddressWithName(&bind.CallOpts{}, symA+"-"+symB)
+	poolAddress, err := factory.GetAddressWithName(&bind.CallOpts{}, symA+"-"+symB)
 	if err != nil {
 		return protocol.Fail(err, 500)
 	}
+	p.UpsertAddress(poolAddress.Hex())
 	contracts, err := contracts.NewLiquidity(poolAddress, p.client)
 	if err != nil {
 		return protocol.Fail(err, 500)
