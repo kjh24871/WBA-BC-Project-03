@@ -1,13 +1,14 @@
 package router
 
 import (
-	ctl "final/backend/controller"
 	"fmt"
+	ctl "lecture/WBA-BC-Project-03/backend/controller"
+
+	"lecture/WBA-BC-Project-03/backend/docs"
 
 	"github.com/gin-gonic/gin"
 	swgFiles "github.com/swaggo/files"
 	ginSwg "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/swag/example/basic/docs"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -53,18 +54,23 @@ func (p *Router) Idx() *gin.Engine {
 	dex := e.Group("", liteAuth())
 	{
 		// 사용자
-		dex.GET("/all", p.ct.GetAllPools) // 1. 사용 가능한 풀 목록 조회
-		dex.GET("/my", p.ct.GetMyPools)   // 2. 자산이 예치된 풀 목록 조회
-		pool := dex.Group("/pool/:pool_name")
+		dex.GET("/all", p.ct.GetLiquidityList) // 1. 사용 가능한 풀 목록 조회
+		// dex.GET("/my", p.ct.GetMyPools)        // 2. 자산이 예치된 풀 목록 조회
+		pool := dex.Group("/pool")
 		{
 			pool.PUT("", p.ct.AddLiquidity)
 			pool.DELETE("", p.ct.RemoveLiquidity)
+			pool.GET("/balance", p.ct.BalanceOf)
+
+			//관리자
+			pool.POST("", p.ct.CreateLiquidity) // 1. 새로운 풀 생성
+			// pool.DELETE("", p.ct.DeleteLiquidity)  // 2. 풀 삭제
+
 		}
 		dex.POST("/swap", p.ct.Swap)
 
 		//관리자
-		dex.POST("", p.ct.CreateLiquidity) // 1. 새로운 풀 생성
-		// pool.DELETE("", p.ct.DeleteLiquidity)  // 2. 풀 삭제
+		// dex.GET("/reward", p.ct.GetReward)
 	}
 
 	return e

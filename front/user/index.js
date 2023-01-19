@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 });
 
 console.clear();
-rl.question('로그인 ', loginProcess);
+rl.question('private key 경로를 입력하세요 ', loginProcess);
 
 const loginProcess = (answer) => {
   

@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Liquidity is ERC20{
   IERC20 tokenA;
@@ -110,5 +110,8 @@ contract Liquidity is ERC20{
     amountB = tokenB.balanceOf(address(this));
     return (liquidity, amountA, amountB);
   }
-}
 
+  function getTokenAddress() public view returns (address, address){
+    return (address(tokenA), address(tokenB));
+  }
+}

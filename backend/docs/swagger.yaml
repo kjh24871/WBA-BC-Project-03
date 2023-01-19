@@ -1,0 +1,176 @@
+definitions:
+  controller.AddLiquidityInput:
+    properties:
+      amount_a:
+        type: string
+      amount_b:
+        type: string
+      sym_a:
+        type: string
+      sym_b:
+        type: string
+    type: object
+  controller.Controller:
+    type: object
+  controller.CreateLiquidityInput:
+    properties:
+      token1:
+        type: string
+      token2:
+        type: string
+    type: object
+  controller.RemoveLiquidityInput:
+    properties:
+      amount:
+        type: string
+      name:
+        type: string
+    type: object
+  controller.SwapInput:
+    properties:
+      amount:
+        type: string
+      input:
+        type: string
+      output:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: private key
+        in: header
+        name: pk
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Controller'
+      summary: call GetLiquidityList, return ok by json.
+  /pool:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: private key
+        in: header
+        name: pk
+        required: true
+        type: string
+      - description: Token address and amount
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controller.RemoveLiquidityInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Controller'
+      summary: call RemoveLiquidity, return ok by json.
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: private key
+        in: header
+        name: pk
+        required: true
+        type: string
+      - description: Token address
+        in: body
+        name: address
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateLiquidityInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Controller'
+      summary: call CreateLiquidity, return ok by json.
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: private key
+        in: header
+        name: pk
+        required: true
+        type: string
+      - description: Token address and amount
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controller.AddLiquidityInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Controller'
+      summary: call AddLiquidity, return ok by json.
+  /pool/balance:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: pool name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: my address
+        in: query
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Controller'
+      summary: call BalanceOf, return ok by json.
+  /swap:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: private key
+        in: header
+        name: pk
+        required: true
+        type: string
+      - description: Token symbol and amount
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controller.SwapInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Controller'
+      summary: call Swap, return ok by json.
+swagger: "2.0"
