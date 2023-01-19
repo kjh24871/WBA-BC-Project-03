@@ -1,9 +1,6 @@
 package protocol
 
 import (
-	"fmt"
-	"lecture/WBABEProject-23/logger"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,8 +38,8 @@ func Fail(e error, code int) *ApiResponse[any] {
 }
 
 func FailCustomMessage(e error, MSG string, code int) *ApiResponse[any] {
-	errLogMSG := fmt.Sprintf("Error: %v, Message: %s", e, MSG)
-	logger.Error(errLogMSG)
+	// errLogMSG := fmt.Sprintf("Error: %v, Message: %s", e, MSG)
+	// logger.Error(errLogMSG)
 	return &ApiResponse[any]{
 		Code:    code,
 		Data:    nil,

@@ -1,95 +1,234 @@
 package model
 
 import (
+	"lecture/WBA-BC-Project-03/backend/protocol"
 	// "context"
 	// "crypto/ecdsa"
 	// "encoding/hex"
-	"fmt"
+
 	"math/big"
 
-	contracts "final/backend/contract3"
+	tokenContracts "lecture/WBA-BC-Project-03/backend/model/wemex/ERC20"
+	contracts "lecture/WBA-BC-Project-03/backend/model/wemex/liquidity"
+	liquidityFactoryContracts "lecture/WBA-BC-Project-03/backend/model/wemex/liquidityFactory"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+
 	// "github.com/ethereum/go-ethereum/common/hexutil"
-	// "github.com/ethereum/go-ethereum/core/types"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	// "github.com/ethereum/go-ethereum/ethclient"
 	// "github.com/ethereum/go-ethereum/rlp"
 	// "golang.org/x/crypto/sha3"
 )
 
-func (p *Model)SwapLiquidity(inputTokenAddress string, amount int64 ) string {
-	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
+func (p *Model) GetLiquidityList() *protocol.ApiResponse[any] {
+	contracts, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
 	if err != nil {
-		panic(err)
+		return protocol.Fail(err, 500)
 	}
-	tokenAddress := common.HexToAddress(inputTokenAddress)
-	inputAmount := big.NewInt(amount)
-
-	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
+	list, err := contracts.GetLiquidityList(&bind.CallOpts{})
 	if err != nil {
-		panic(err)
+		return protocol.Fail(err, 500)
 	}
-
-	transactorOpts,err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1112))
-	if err != nil {
-		panic(err)
-	}
-	tx, err := contracts.Swap(transactorOpts, tokenAddress, inputAmount)
-	if err != nil {
-		panic(eff)
-	}
-
-	fmt.Println("Transaction sent:", tx.Hash().Hex())
-	return tx.Hash().Hex()
+	return protocol.SuccessData(list, protocol.OK)
 }
 
-func (p *Model)AddLiquidity(_desiredAmountA int64, _desiredAmountB int64 ) string {
-	contracts, err := contracts.NewContracts(p.liquidityAddress, p.client)
+func (p *Model) SwapLiquidity(poolAddress common.Address, input string, amount int64, pk string) *protocol.ApiResponse[any] {
+	contracts, err := contracts.NewLiquidity(poolAddress, p.client)
 	if err != nil {
-		panic(err)
+		return protocol.Fail(err, 500)
+	}
+
+	tokenAAddress, tokenBAddress, err := contracts.GetTokenAddress(&bind.CallOpts{})
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	tokenAContract, err := tokenContracts.NewERC20(tokenAAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	inputTokenAddress := tokenAAddress
+	tokenASymbol, err := tokenAContract.Symbol(&bind.CallOpts{})
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	if tokenASymbol != input {
+		inputTokenAddress = tokenBAddress
+	}
+	inputAmount := big.NewInt(amount)
+
+	inputTokenContract, err := tokenContracts.NewERC20(inputTokenAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	privateKey, err := crypto.HexToECDSA(pk)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	transactorOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1112))
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	_, err = inputTokenContract.Approve(transactorOpts, poolAddress, big.NewInt(amount))
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	tx, err := contracts.Swap(transactorOpts, inputTokenAddress, inputAmount)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	return protocol.SuccessData(tx.Hash().Hex(), protocol.OK)
+}
+
+func (p *Model) AddLiquidity(_desiredAmountA int64, _desiredAmountB int64, pk string, symA string, symB string) *protocol.ApiResponse[any] {
+
+	//  심볼 2개 합쳐서 pool 이름 구하기 -> pool 이름을 주소 구하기 -> 두개 token Address도 나온다
+	// 심볼1-심볼2
+	poolContracts, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	poolAddress, err := poolContracts.GetAddressWithName(&bind.CallOpts{}, symA+"-"+symB)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	contracts, err := contracts.NewLiquidity(poolAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	tokenAAddress, tokenBAddress, err := contracts.GetTokenAddress(&bind.CallOpts{})
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	tokenAContracts, err := tokenContracts.NewERC20(tokenAAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	tokenBContracts, err := tokenContracts.NewERC20(tokenBAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
 	}
 	inputAmountA := big.NewInt(_desiredAmountA)
 	inputAmountB := big.NewInt(_desiredAmountB)
-	privateKey, err := crypto.HexToECDSA("f7b0033d5c91b7258b2557a66b1743195ffd77fc285b4cbba2ecd3f94d9c5939")
+	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
-		fmt.Println(err)
+		return protocol.Fail(err, 500)
 	}
-	
-	transactorOpts,err := bind.NewKeyedTransactorWithChainID(privateKey,big.NewInt(1112))
+
+	transactorOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1112))
 	if err != nil {
-		panic(err)
+		return protocol.Fail(err, 500)
 	}
 	// TODO : Approve 2 토큰하기
-	// txApprove, err := contracts.
-
+	_, err = tokenAContracts.Approve(transactorOpts, poolAddress, inputAmountA)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	_, err = tokenBContracts.Approve(transactorOpts, poolAddress, inputAmountB)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
 	tx, err := contracts.AddLiquidity(transactorOpts, inputAmountA, inputAmountB)
 	if err != nil {
-		panic(err)
+		return protocol.Fail(err, 500)
 	}
-	fmt.Println("Transaction sent:", tx.Hash().Hex())
-	return tx.Hash().Hex()
+	return protocol.SuccessData(tx.Hash().Hex(), protocol.OK)
 }
 
-func (p *Model)BalanceOf(strAddress string) *big.Int{
-	instance, err := contracts.NewContracts(p.liquidityAddress, p.client)
+func (p *Model) BalanceOf(poolName string, strAddress string) *protocol.ApiResponse[any] {
+
+	liquidityFactoryContracts, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
 	if err != nil {
-		panic(err)
+		return protocol.Fail(err, 500)
+	}
+	poolAddress, err := liquidityFactoryContracts.GetAddressWithName(&bind.CallOpts{}, poolName)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	instance, err := contracts.NewLiquidity(poolAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
 	}
 	address := common.HexToAddress(strAddress)
 	balance, err := instance.BalanceOf(&bind.CallOpts{}, address)
 	if err != nil {
-		panic(err)
+		return protocol.Fail(err, 500)
 	}
-	return balance
+	return protocol.SuccessData(balance, protocol.OK)
 }
 
-// func (p *Model) Approve(strAddress string, amount int64) {
-// 	instance, err := contracts.NewContracts(p.liquidityAddress, p.client)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	address := common.HexToAddress(strAddress)
-// 	instance.Appro 
-// }
+func (p *Model) RemoveLiquidity(poolName string, lpAmount int64, pk string) *protocol.ApiResponse[any] {
+	factory, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	poolAddress, err := factory.GetAddressWithName(&bind.CallOpts{}, poolName)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	inputAmount := big.NewInt(lpAmount)
+
+	liquidityContract, err := contracts.NewLiquidity(poolAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	privateKey, err := crypto.HexToECDSA(pk)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	transactorOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1112))
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	tx, err := liquidityContract.RemoveLiquidity(transactorOpts, inputAmount)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	return protocol.SuccessData(tx.Hash().Hex(), protocol.OK)
+}
+
+func (p *Model) GetReward(pk string) *protocol.ApiResponse[any] {
+	privateKey, err := crypto.HexToECDSA(pk)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	factory, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
+	var txs []string
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	// pool symbol list 반환
+	poolList, err := factory.GetLiquidityList(&bind.CallOpts{})
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	for _, poolContracts := range poolList {
+		poolAddress, err := factory.GetAddressWithName(&bind.CallOpts{}, poolContracts)
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		poolContract, err := contracts.NewLiquidity(poolAddress, p.client)
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		transactorOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1112))
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		tx, err := poolContract.PullReward(transactorOpts)
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		txs = append(txs, tx.Hash().Hex())
+	}
+	return protocol.SuccessData(txs, protocol.OK)
+}

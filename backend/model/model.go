@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
-	contracts "final/backend/contract"
+	contracts "lecture/WBA-BC-Project-03/backend/model/wemex/ERC20"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -19,24 +19,32 @@ import (
 )
 
 type Model struct {
-	client       *ethclient.Client
-	tokenAddress common.Address //컨트랙트 어드레스
-	token2Address common.Address
-	ownerAddress common.Address //내 지갑 주소
-	liquidityAddress common.Address
+	// mongoClient              *mongo.Client
+	// colBlock                 *mongo.Collection
+	client                   *ethclient.Client
+	tokenAddress             common.Address //컨트랙트 어드레스
+	liquidityFactoryAddresss common.Address
 }
 
 func NewModel() (*Model, error) {
 	r := &Model{}
 	var err error
+
+	// if r.mongoClient, err = mongo.Connect(context.Background(), options.Client().ApplyURI(mgUrl)); err != nil {
+	// 	return nil, err
+	// } else if err := r.mongoClient.Ping(context.Background(), nil); err != nil {
+	// 	return nil, err
+	// } else {
+	// 	db := r.mongoClient.Database("daemon")
+	// 	r.colBlock = db.Collection("block")
+	// }
+
 	r.client, err = ethclient.Dial("https://api.test.wemix.com")
 	if err != nil {
 		fmt.Println("client error")
 	}
-	r.tokenAddress = common.HexToAddress("0xB451E9Fd9114611e88B257D04A62D22a86FFA1c2")
-	r.token2Address = common.HexToAddress("0xD2C1ea8092E2417d140510d6568292e49aa1Bef2")
-	r.ownerAddress = common.HexToAddress("0x15A67B0bB392b2978bFeDBC67809A562d7045767")
-	r.liquidityAddress = common.HexToAddress("0x639e1243125e2081975FBF303e5ee682020c593a")
+
+	r.liquidityFactoryAddresss = common.HexToAddress("0x676236373807370D0d145900876AA19B3D1968fB")
 	return r, err
 }
 
@@ -129,7 +137,7 @@ func (p *Model) ContractCreateTransferTx(pk string, dstAddress string, amount in
 	}
 	// 전송할 양, gasLimit, gasPrice 설정. 추천되는 gasPrice를 가져옴
 	value := big.NewInt(amount * 1000000000000000000)
-	fmt.Println("value : " ,value)
+	fmt.Println("value : ", value)
 	// value := big.NewInt(700000000000000000)
 	gasPrice, err := p.client.SuggestGasPrice(context.Background())
 	if err != nil {
@@ -186,7 +194,7 @@ func (p *Model) ContractCreateTransferTx(pk string, dstAddress string, amount in
 }
 
 func (p *Model) GetSymbolByToken(token string) string {
-	instance, err := contracts.NewContracts(p.tokenAddress, p.client)
+	instance, err := contracts.NewERC20(p.tokenAddress, p.client)
 	if err != nil {
 		panic(err)
 	}
@@ -205,7 +213,7 @@ func (p *Model) GetSymbolByToken(token string) string {
 }
 
 func (p *Model) GetTokenWithAddress(address string) *big.Int {
-	instance, err := contracts.NewContracts(p.tokenAddress, p.client)
+	instance, err := contracts.NewERC20(p.tokenAddress, p.client)
 	if err != nil {
 		panic(err)
 	}
@@ -231,3 +239,9 @@ func (p *Model) TransferTokenWithAddress(address string, value int64) string {
 func (p *Model) TransferTokenWithPK(address string, pk string, value int64) string {
 	return p.ContractCreateTransferTx(pk, address, value)
 }
+
+// func (p *Model) TxTracking(tx string) *protocol.ApiResponse[any] {
+// 	filter := bson.M{"transactions": bson.M{"$elemMatch": bson.M{"hash": tx}}}
+// 	result := p.colBlock.FindOne(context.TODO(), filter)
+// 	if
+// }

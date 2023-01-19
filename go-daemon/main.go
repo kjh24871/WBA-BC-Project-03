@@ -34,7 +34,7 @@ func main() {
 	MaxRetries := 5
 	dialRetries := MaxRetries
 	logs := make(chan types.Log)
-	contractAddress := common.HexToAddress("배포한 컨트랙트 주소")
+	contractAddress := common.HexToAddress("0x676236373807370D0d145900876AA19B3D1968fB")
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
 	}
