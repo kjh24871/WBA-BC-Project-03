@@ -28,6 +28,7 @@ WEMIX에는 다양한 게임들이 있습니다. 그중 저희는 P2E(Play to Ea
 <img src="https://img.shields.io/badge/Solidity-363636?style=for-the-badge&logo=solidity&logoColor=white"> <img src="https://img.shields.io/badge/Truffle-5E464D?style=for-the-badge&logo=truffle&logoColor=white"> <img src="https://img.shields.io/badge/Ganache-E4A663?style=for-the-badge&logo=ganache&logoColor=white"> 
 
 [Daemon]
+
 <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=black">
 <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white">
 
