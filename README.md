@@ -17,6 +17,9 @@ WEMIX 생태계에서 토큰을 사용하는 사용자들에게 더 간편한 �
 
 
 ## 설치 방법
+```shell
+  git clone https://github.com/codestates/WBA-BC-Project-03.git
+```
 ```go
   go mod tidy
 ```
