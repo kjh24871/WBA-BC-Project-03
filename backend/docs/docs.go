@@ -259,7 +259,10 @@ const docTemplate = `{
         "controller.RemoveLiquidityInput": {
             "type": "object",
             "properties": {
-                "amount_a": {
+                "amount": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

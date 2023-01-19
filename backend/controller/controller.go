@@ -114,11 +114,12 @@ func (p *Controller) RemoveLiquidity(c *gin.Context) {
 	pk := c.GetHeader("pk")
 	c.BindJSON(&input)
 	intAmount, _ := strconv.ParseInt(input.Amount, 10, 64)
-	p.md.RemoveLiquidity(intAmount, pk).Response(c)
+	p.md.RemoveLiquidity(input.PoolName, intAmount, pk).Response(c)
 }
 
 type RemoveLiquidityInput struct {
-	Amount string `json:"amount_a"`
+	Amount   string `json:"amount"`
+	PoolName string `json:"name"`
 }
 
 // Swap godoc
@@ -152,13 +153,21 @@ type SwapInput struct {
 	Amount string `json:"amount"`
 }
 
-// func (p *Controller) GetAddressWithName(c *gin.Context) {
-// 	name := c.Query("name")
-// 	p.md.GetAddressWithName(name).Response(c)
-// }
-
 // func (p *Controller) CheckTx(c *gin.Context) {
 // 	pk := c.GetHeader("pk")
 // 	tx := c.Query("tx")
+// }
 
+// PullReward godoc
+// @Summary call PullReward, return ok by json.
+// @교환하기
+// @name PullReward
+// @Accept  json
+// @Produce  json
+// @Param pk header string true "private key"
+// @Router /reward [GET]
+// @Success 200 {object} Controller
+// func (p *Controller) GetReward(c *gin.Context) {
+// 	pk := c.GetHeader("pk")
+// 	p.md.GetReward(pk).Response(c)
 // }

@@ -21,7 +21,9 @@ definitions:
     type: object
   controller.RemoveLiquidityInput:
     properties:
-      amount_a:
+      amount:
+        type: string
+      name:
         type: string
     type: object
   controller.SwapInput:

@@ -16,7 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 
 	// "github.com/ethereum/go-ethereum/common/hexutil"
-	// "github.com/ethereum/go-ethereum/core/types"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	// "github.com/ethereum/go-ethereum/ethclient"
 	// "github.com/ethereum/go-ethereum/rlp"
@@ -36,7 +36,7 @@ func (p *Model) GetLiquidityList() *protocol.ApiResponse[any] {
 }
 
 func (p *Model) SwapLiquidity(poolAddress common.Address, input string, amount int64, pk string) *protocol.ApiResponse[any] {
-	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
+	contracts, err := contracts.NewLiquidity(poolAddress, p.client)
 	if err != nil {
 		return protocol.Fail(err, 500)
 	}
@@ -145,7 +145,7 @@ func (p *Model) BalanceOf(poolName string, strAddress string) *protocol.ApiRespo
 	if err != nil {
 		return protocol.Fail(err, 500)
 	}
-	poolAddress, err := liquidityFactoryContracts.GetAddressWithName(&bind.CallOpts{},poolName)
+	poolAddress, err := liquidityFactoryContracts.GetAddressWithName(&bind.CallOpts{}, poolName)
 	if err != nil {
 		return protocol.Fail(err, 500)
 	}
@@ -162,12 +162,21 @@ func (p *Model) BalanceOf(poolName string, strAddress string) *protocol.ApiRespo
 	return protocol.SuccessData(balance, protocol.OK)
 }
 
-func (p *Model) RemoveLiquidity(lpAmount int64, pk string) *protocol.ApiResponse[any] {
-	contracts, err := contracts.NewLiquidity(p.liquidityAddress, p.client)
+func (p *Model) RemoveLiquidity(poolName string, lpAmount int64, pk string) *protocol.ApiResponse[any] {
+	factory, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	poolAddress, err := factory.GetAddressWithName(&bind.CallOpts{}, poolName)
 	if err != nil {
 		return protocol.Fail(err, 500)
 	}
 	inputAmount := big.NewInt(lpAmount)
+
+	liquidityContract, err := contracts.NewLiquidity(poolAddress, p.client)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
 
 	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
@@ -179,9 +188,47 @@ func (p *Model) RemoveLiquidity(lpAmount int64, pk string) *protocol.ApiResponse
 		return protocol.Fail(err, 500)
 	}
 
-	tx, err := contracts.RemoveLiquidity(transactorOpts, inputAmount)
+	tx, err := liquidityContract.RemoveLiquidity(transactorOpts, inputAmount)
 	if err != nil {
 		return protocol.Fail(err, 500)
 	}
 	return protocol.SuccessData(tx.Hash().Hex(), protocol.OK)
+}
+
+func (p *Model) GetReward(pk string) *protocol.ApiResponse[any] {
+	privateKey, err := crypto.HexToECDSA(pk)
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+
+	factory, err := liquidityFactoryContracts.NewLiquidityFactory(p.liquidityFactoryAddresss, p.client)
+	var txs []string
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	// pool symbol list 반환
+	poolList, err := factory.GetLiquidityList(&bind.CallOpts{})
+	if err != nil {
+		return protocol.Fail(err, 500)
+	}
+	for _, poolContracts := range poolList {
+		poolAddress, err := factory.GetAddressWithName(&bind.CallOpts{}, poolContracts)
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		poolContract, err := contracts.NewLiquidity(poolAddress, p.client)
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		transactorOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1112))
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		tx, err := poolContract.PullReward(transactorOpts)
+		if err != nil {
+			return protocol.Fail(err, 500)
+		}
+		txs = append(txs, tx.Hash().Hex())
+	}
+	return protocol.SuccessData(txs, protocol.OK)
 }

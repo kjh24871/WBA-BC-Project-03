@@ -43,17 +43,17 @@ func (p *Model) NewLiquidityPool(inputToken1Address string, inputToken2Address s
 	}
 	privateKey, err := crypto.HexToECDSA(ownerPK)
 	if err != nil {
-		return protocol.Fail(err, 501)
+		return protocol.Fail(err, 500)
 	}
 	transactorOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1112))
 	if err != nil {
-		return protocol.Fail(err, 502)
+		return protocol.Fail(err, 500)
 	}
 	token1Address := common.HexToAddress(inputToken1Address)
 	token2Address := common.HexToAddress(inputToken2Address)
 	tx, err := contracts.NewLiquidity(transactorOpts, token1Address, token2Address)
 	if err != nil {
-		return protocol.Fail(err, 503)
+		return protocol.Fail(err, 500)
 	}
 	return protocol.SuccessData(tx.Hash().Hex(), protocol.OK)
 }
