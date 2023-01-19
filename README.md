@@ -29,14 +29,10 @@ WEMIX에는 다양한 게임들이 있습니다. 그중 저희는 P2E(Play to Ea
 
 [Daemon]
 
-<img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=black">
-<img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white">
+<img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=black"> <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white">
 
 
 
 ## 구현 목록
 ## 결과물
 
-
-## 라이센스
-This project is licensed under the MIT License 
