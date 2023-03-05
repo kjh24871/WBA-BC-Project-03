@@ -76,13 +76,24 @@ contract Liquidity is ERC20{
     return outputAmount;
   }
 
-  function pullReward() public{
+  function pullRewardWithServer() public{
     uint256 amount;
     uint256 totalSupply = totalSupply();
     for(uint256 i = 0 ; i < delegators.length ; i++){
       amount = address(this).balance * balanceOf(delegators[i]) / totalSupply;
       delegators[i].transfer(amount);
     }
+  }
+
+  function pullRewardWithClient() public{
+    uint256 myRatio;
+    uint256 amount;
+    uint256 totalSupply = totalSupply();
+    myRatio = msg.sender.balance / totalSupply;
+    amount = address(this).balance * myRatio;
+    
+    // Todo : PullReward 방식 수정
+    msg.sender.transfer(amount);
   }
 
   function getSwapRatio(uint256 _inputAmount, uint256 _liquidityInput, uint256 _liquidityOutput)
