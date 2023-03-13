@@ -10,7 +10,7 @@ contract LiquidityFactory{
 	address public owner;
 	mapping (address => Liquidity) public contracts;
 	mapping (string => address) poolAddress;
-	string[] poolName;
+	mapping (address => mapping(address => address)) public getPair;
 
 	constructor(){
 		owner = msg.sender;
@@ -32,6 +32,8 @@ contract LiquidityFactory{
 		string memory name = string(bytes.concat(bytes(token1Name), "-", bytes(token2Name)));
 		string memory sym = string(bytes.concat("WEMEX-" , bytes(Strings.toString(poolName.length))));
 		Liquidity l = new Liquidity(_token1Address, _token2Address, name, sym);
+		getPair[_token1Address][_token2Address] = l;
+		getPair[_token2Address][_token1Address] = l;
 		poolName.push(name);
 		contracts[address(l)] = l;
 		poolAddress[name] = address(l);
