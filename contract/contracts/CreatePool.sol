@@ -31,6 +31,7 @@ contract LiquidityFactory{
 		string memory token2Name = ERC20(_token2Address).symbol();
 		string memory name = string(bytes.concat(bytes(token1Name), "-", bytes(token2Name)));
 		string memory sym = string(bytes.concat("WEMEX-" , bytes(Strings.toString(poolName.length))));
+		// UniSwap의 경우 컨트랙트 배포를 어셈블리어로 수행 -> 코드 분석해보기
 		Liquidity l = new Liquidity(_token1Address, _token2Address, name, sym);
 		poolName.push(name);
 		contracts[address(l)] = l;
